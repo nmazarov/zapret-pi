@@ -1,0 +1,15 @@
+[Unit]
+Description=Zapret-Pi Web Control Panel
+After=network.target zapret.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/zapret-web
+ExecStart=/opt/zapret-web/venv/bin/python3 /opt/zapret-web/app.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

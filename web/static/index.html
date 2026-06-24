@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Zapret Web — панель управления обходом DPI блокировок">
+<meta name="theme-color" content="#0a0e1a">
+<title>Zapret — Панель управления</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e1a;--bg2:#0f1429;--bg3:#151b33;
+  --glass:rgba(255,255,255,.04);--glass-border:rgba(255,255,255,.08);
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --accent:#6366f1;--accent2:#8b5cf6;--accent3:#a78bfa;
+  --green:#22c55e;--green-dim:rgba(34,197,94,.15);
+  --red:#ef4444;--red-dim:rgba(239,68,68,.15);
+  --blue:#3b82f6;--blue-dim:rgba(59,130,246,.15);
+  --yellow:#eab308;--yellow-dim:rgba(234,179,8,.15);
+  --radius:16px;--radius-sm:10px;--radius-xs:6px;
+  --shadow:0 8px 32px rgba(0,0,0,.4);
+  --transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;line-height:1.6;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%,rgba(99,102,241,.12),transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%,rgba(139,92,246,.08),transparent);
+}
+a{color:var(--accent3);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+
+/* ===== LAYOUT ===== */
+.app{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+
+/* ===== HEADER ===== */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0;margin-bottom:8px;flex-wrap:wrap;gap:12px
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:700;color:#fff;
+  box-shadow:0 4px 20px rgba(99,102,241,.35)
+}
+.logo-text{font-size:1.4rem;font-weight:700;letter-spacing:-.02em}
+.logo-sub{font-size:.75rem;color:var(--text3);font-weight:400}
+
+/* ===== TABS ===== */
+.tabs{
+  display:flex;gap:4px;padding:4px;
+  background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);margin-bottom:24px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch
+}
+.tab{
+  padding:10px 20px;border-radius:var(--radius-xs);
+  font-size:.85rem;font-weight:500;cursor:pointer;
+  color:var(--text2);transition:var(--transition);
+  white-space:nowrap;border:none;background:none;
+  user-select:none
+}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.tab.active{
+  color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  box-shadow:0 2px 12px rgba(99,102,241,.3)
+}
+
+/* ===== CARDS ===== */
+.card{
+  background:var(--glass);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:24px;
+  box-shadow:var(--shadow);
+  transition:var(--transition)
+}
+.card:hover{border-color:rgba(255,255,255,.12)}
+.card-title{font-size:1rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+/* ===== GRID ===== */
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.grid-4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+
+/* ===== STATUS BADGE ===== */
+.status-section{text-align:center;padding:32px 0 24px}
+.status-badge{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:16px 36px;border-radius:60px;
+  font-size:1.2rem;font-weight:600;
+  transition:var(--transition)
+}
+.status-badge.active{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.status-badge.stopped{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+
+.pulse{
+  width:12px;height:12px;border-radius:50%;position:relative;flex-shrink:0
+}
+.pulse::after{
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  animation:pulse-ring 2s ease-out infinite;
+}
+.status-badge.active .pulse{background:var(--green)}
+.status-badge.active .pulse::after{border:2px solid var(--green)}
+.status-badge.stopped .pulse{background:var(--red)}
+.status-badge.stopped .pulse::after{border:2px solid var(--red);animation:none}
+
+@keyframes pulse-ring{
+  0%{transform:scale(1);opacity:.6}
+  100%{transform:scale(2.2);opacity:0}
+}
+
+/* ===== STAT CARDS ===== */
+.stat-card{text-align:center;padding:20px}
+.stat-icon{font-size:1.8rem;margin-bottom:8px;display:block}
+.stat-value{font-size:1.5rem;font-weight:700;margin-bottom:2px}
+.stat-label{font-size:.78rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:var(--radius-xs);
+  font-family:inherit;font-size:.85rem;font-weight:600;
+  cursor:pointer;border:none;transition:var(--transition);
+  color:#fff;user-select:none
+}
+.btn:active{transform:scale(.97)}
+.btn-green{background:var(--green);box-shadow:0 2px 12px rgba(34,197,94,.3)}
+.btn-green:hover{background:#16a34a}
+.btn-red{background:var(--red);box-shadow:0 2px 12px rgba(239,68,68,.3)}
+.btn-red:hover{background:#dc2626}
+.btn-blue{background:var(--blue);box-shadow:0 2px 12px rgba(59,130,246,.3)}
+.btn-blue:hover{background:#2563eb}
+.btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 2px 12px rgba(99,102,241,.3)}
+.btn-accent:hover{opacity:.9}
+.btn-ghost{
+  background:rgba(255,255,255,.06);color:var(--text2);
+  border:1px solid var(--glass-border)
+}
+.btn-ghost:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.btn-sm{padding:7px 14px;font-size:.78rem}
+
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+
+/* ===== STRATEGY CARDS ===== */
+.strategy-card{position:relative;padding:20px;transition:var(--transition)}
+.strategy-card.active-strategy{border-color:var(--green) !important;box-shadow:0 0 24px rgba(34,197,94,.12)}
+.strategy-card .badge-active{
+  position:absolute;top:12px;right:12px;
+  background:var(--green-dim);color:var(--green);
+  padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;
+  display:none;align-items:center;gap:4px
+}
+.strategy-card.active-strategy .badge-active{display:inline-flex}
+.strategy-name{font-size:1rem;font-weight:600;margin-bottom:6px}
+.strategy-desc{font-size:.82rem;color:var(--text2);margin-bottom:12px;line-height:1.5}
+.strategy-args{
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  background:rgba(0,0,0,.3);padding:10px 12px;border-radius:var(--radius-xs);
+  color:var(--accent3);word-break:break-all;margin-bottom:14px;
+  border:1px solid rgba(255,255,255,.05);line-height:1.6
+}
+.strategy-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 16px;text-align:left;font-size:.85rem}
+th{color:var(--text3);font-weight:500;text-transform:uppercase;font-size:.72rem;letter-spacing:.06em;border-bottom:1px solid var(--glass-border)}
+td{border-bottom:1px solid rgba(255,255,255,.04)}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ===== LOG VIEWER ===== */
+.log-viewer{
+  background:rgba(0,0,0,.35);border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);padding:16px;
+  font-family:'JetBrains Mono','Courier New',monospace;
+  font-size:.75rem;color:var(--text2);
+  max-height:500px;overflow:auto;white-space:pre-wrap;
+  word-break:break-all;line-height:1.7
+}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+  z-index:1000;padding:20px
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:28px;
+  width:100%;max-width:520px;box-shadow:0 24px 64px rgba(0,0,0,.5);
+  animation:modal-in .25s ease-out
+}
+@keyframes modal-in{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.modal h3{font-size:1.1rem;font-weight:600;margin-bottom:20px}
+.modal label{display:block;font-size:.82rem;color:var(--text2);margin-bottom:6px;font-weight:500}
+.modal input,.modal textarea{
+  width:100%;padding:10px 14px;border-radius:var(--radius-xs);
+  border:1px solid var(--glass-border);background:rgba(255,255,255,.05);
+  color:var(--text);font-family:inherit;font-size:.88rem;
+  margin-bottom:16px;transition:var(--transition);outline:none
+}
+.modal input:focus,.modal textarea:focus{border-color:var(--accent)}
+.modal textarea{min-height:80px;resize:vertical;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+
+/* ===== TOAST ===== */
+.toast-container{position:fixed;top:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:8px}
+.toast{
+  padding:14px 20px;border-radius:var(--radius-sm);
+  font-size:.85rem;font-weight:500;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  animation:toast-in .3s ease-out;max-width:380px;
+  display:flex;align-items:center;gap:10px
+}
+.toast.success{background:rgba(34,197,94,.15);color:var(--green);border-color:rgba(34,197,94,.2)}
+.toast.error{background:rgba(239,68,68,.15);color:var(--red);border-color:rgba(239,68,68,.2)}
+.toast.info{background:rgba(59,130,246,.15);color:var(--blue);border-color:rgba(59,130,246,.2)}
+@keyframes toast-in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes toast-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(40px)}}
+
+/* ===== DEVICE CARDS ===== */
+.device-card{text-align:center;padding:20px 16px}
+.device-icon{font-size:2.2rem;margin-bottom:10px;display:block}
+.device-name{font-weight:600;margin-bottom:6px}
+.device-steps{font-size:.78rem;color:var(--text2);text-align:left;line-height:1.7}
+.device-steps code{
+  background:rgba(99,102,241,.15);color:var(--accent3);
+  padding:1px 6px;border-radius:4px;font-size:.76rem
+}
+
+/* ===== NETWORK SECTION ===== */
+.net-block{margin-bottom:20px}
+.net-block h4{font-size:.88rem;font-weight:600;margin-bottom:10px;color:var(--accent3)}
+.net-block pre{
+  background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.05);
+  border-radius:var(--radius-xs);padding:14px;
+  font-size:.75rem;color:var(--text2);overflow-x:auto;white-space:pre-wrap;
+  max-height:300px;line-height:1.6
+}
+
+/* ===== SECTION SPACING ===== */
+.section{display:none}
+.section.active{display:block}
+.section-title{font-size:1.15rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.mb-16{margin-bottom:16px}
+.mb-24{margin-bottom:24px}
+.gap-flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* ===== IP FORWARD BADGE ===== */
+.ip-fwd-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 16px;border-radius:20px;font-size:.82rem;font-weight:600
+}
+.ip-fwd-badge.on{background:var(--green-dim);color:var(--green)}
+.ip-fwd-badge.off{background:var(--red-dim);color:var(--red)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:640px){
+  .header{flex-direction:column;align-items:flex-start}
+  .status-badge{font-size:1rem;padding:12px 24px}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .btn{padding:9px 16px;font-size:.8rem}
+  .modal{padding:20px}
+  .tab{padding:8px 14px;font-size:.8rem}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">Z</div>
+      <div>
+        <div class="logo-text">Zapret</div>
+        <div class="logo-sub">Панель управления DPI</div>
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:var(--text3)" id="header-time"></div>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="dashboard">📊 Дашборд</button>
+    <button class="tab" data-tab="strategies">⚡ Стратегии</button>
+    <button class="tab" data-tab="clients">👥 Клиенты</button>
+    <button class="tab" data-tab="logs">📋 Логи</button>
+    <button class="tab" data-tab="network">🌐 Сеть</button>
+  </nav>
+
+  <!-- ==================== DASHBOARD ==================== -->
+  <div class="section active" id="sec-dashboard">
+    <div class="status-section">
+      <div class="status-badge stopped" id="status-badge">
+        <span class="pulse"></span>
+        <span id="status-text">Загрузка...</span>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-4 mb-24" id="stats-grid">
+      <div class="card stat-card">
+        <span class="stat-icon">🌡️</span>
+        <div class="stat-value" id="cpu-temp">—</div>
+        <div class="stat-label">Температура CPU</div>
+      </div>
+      <div class="card stat-card">
+        <span class="stat-icon">💾</span>
+        <div class="stat-value" id="mem-usage">—</div>
+        <div class="stat-label">Память</div>
+      </div>
+      <div class="card stat-card">
+        <span class="stat-icon">⚙️</span>
+        <div class="stat-value" id="cpu-load">—</div>
+        <div class="stat-label">Нагрузка CPU</div>
+      </div>
+      <div class="card stat-card">
+        <span class="stat-icon">📡</span>
+        <div class="stat-value" id="net-traffic">—</div>
+        <div class="stat-label">Трафик (RX/TX)</div>
+      </div>
+    </div>
+
+    <!-- Uptime -->
+    <div class="card mb-24" style="text-align:center;padding:14px">
+      <span style="color:var(--text3);font-size:.82rem">⏱️ Аптайм: </span>
+      <span id="uptime" style="font-weight:600;font-size:.88rem">—</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls mb-24">
+      <button class="btn btn-green" onclick="zapretAction('start')">▶ Запустить</button>
+      <button class="btn btn-red" onclick="zapretAction('stop')">⏹ Остановить</button>
+      <button class="btn btn-blue" onclick="zapretAction('restart')">🔄 Перезапустить</button>
+      <button class="btn btn-ghost" onclick="refreshStatus()">↻ Обновить</button>
+    </div>
+
+    <!-- Device Setup -->
+    <h3 class="section-title">📱 Подключение устройств</h3>
+    <p style="font-size:.82rem;color:var(--text2);margin-bottom:16px">Укажите IP Raspberry Pi (<code id="gw-ip-info" style="color:var(--accent3)">загрузка...</code>) как шлюз на устройстве:</p>
+    <div class="grid grid-4" id="device-grid">
+      <div class="card device-card">
+        <span class="device-icon">🎮</span>
+        <div class="device-name">PlayStation 5</div>
+        <div class="device-steps">
+          1. Настройки → Сеть<br>
+          2. Настроить подключение<br>
+          3. Вручную<br>
+          4. Основной шлюз: <code class="gw-ip">…</code><br>
+          5. DNS: <code class="gw-ip">…</code>
+        </div>
+      </div>
+      <div class="card device-card">
+        <span class="device-icon">💻</span>
+        <div class="device-name">Компьютер</div>
+        <div class="device-steps">
+          1. Параметры сети<br>
+          2. Свойства адаптера<br>
+          3. IPv4 → Свойства<br>
+          4. Шлюз: <code class="gw-ip">…</code><br>
+          5. DNS: <code class="gw-ip">…</code>
+        </div>
+      </div>
+      <div class="card device-card">
+        <span class="device-icon">📺</span>
+        <div class="device-name">Телевизор</div>
+        <div class="device-steps">
+          1. Настройки → Сеть<br>
+          2. Расширенные настройки<br>
+          3. IP вручную<br>
+          4. Шлюз: <code class="gw-ip">…</code><br>
+          5. DNS: <code class="gw-ip">…</code>
+        </div>
+      </div>
+      <div class="card device-card">
+        <span class="device-icon">📱</span>
+        <div class="device-name">Телефон</div>
+        <div class="device-steps">
+          1. Настройки Wi-Fi<br>
+          2. Изменить сеть<br>
+          3. Расширенные<br>
+          4. IP: Статический<br>
+          5. Шлюз: <code class="gw-ip">…</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== STRATEGIES ==================== -->
+  <div class="section" id="sec-strategies">
+    <div class="gap-flex mb-24">
+      <h3 class="section-title" style="margin:0">⚡ Стратегии обхода</h3>
+      <button class="btn btn-accent btn-sm" onclick="openAddModal()">+ Добавить</button>
+    </div>
+    <div class="grid grid-2" id="strategies-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- ==================== CLIENTS ==================== -->
+  <div class="section" id="sec-clients">
+    <h3 class="section-title mb-16">👥 Подключённые устройства</h3>
+    <div class="card mb-24">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>IP-адрес</th><th>MAC-адрес</th></tr></thead>
+          <tbody id="clients-table"><tr><td colspan="3" style="color:var(--text3)">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" id="adguard-section">
+      <div class="card-title">🛡️ AdGuard Home</div>
+      <p style="font-size:.85rem;color:var(--text2)" id="adguard-info">Проверка...</p>
+    </div>
+  </div>
+
+  <!-- ==================== LOGS ==================== -->
+  <div class="section" id="sec-logs">
+    <div class="gap-flex mb-16">
+      <h3 class="section-title" style="margin:0">📋 Журнал zapret</h3>
+      <button class="btn btn-ghost btn-sm" onclick="loadLogs()">↻ Обновить</button>
+      <button class="btn btn-accent btn-sm" onclick="runDiagnostics()">🔍 Диагностика</button>
+    </div>
+    <div class="log-viewer" id="log-viewer">Загрузка логов...</div>
+  </div>
+
+  <!-- ==================== NETWORK ==================== -->
+  <div class="section" id="sec-network">
+    <h3 class="section-title mb-16">🌐 Состояние сети</h3>
+    <div class="mb-24">
+      <span class="ip-fwd-badge off" id="ip-fwd-badge">IP Forward: Проверка...</span>
+    </div>
+    <div class="card mb-16">
+      <div class="net-block">
+        <h4>NAT Rules (iptables -t nat)</h4>
+        <pre id="nat-rules">Загрузка...</pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="net-block">
+        <h4>Mangle Rules (iptables -t mangle)</h4>
+        <pre id="mangle-rules">Загрузка...</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD STRATEGY MODAL ===== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3>Добавить стратегию</h3>
+    <label>Идентификатор (латиница, без пробелов)</label>
+    <input type="text" id="m-key" placeholder="my_strategy">
+    <label>Название</label>
+    <input type="text" id="m-name" placeholder="Моя стратегия">
+    <label>Описание</label>
+    <input type="text" id="m-desc" placeholder="Описание стратегии">
+    <label>Аргументы nfqws</label>
+    <textarea id="m-args" placeholder="--dpi-desync=fake,split2 --dpi-desync-ttl=3 ..."></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-accent" onclick="saveStrategy()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ===== State ===== */
+let gatewayIP = '192.168.1.1';
+let activeArgs = '';
+let statusInterval;
+
+/* ===== Toast ===== */
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  el.innerHTML = `<span>${icons[type] || ''}</span><span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toast-out .3s ease-in forwards';
+    setTimeout(() => el.remove(), 300);
+  }, 3500);
+}
+
+/* ===== Tabs ===== */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
+    // lazy load
+    const t = tab.dataset.tab;
+    if (t === 'strategies') loadStrategies();
+    else if (t === 'logs') loadLogs();
+    else if (t === 'network') loadNetwork();
+    else if (t === 'clients') { refreshStatus(); loadAdguard(); }
+  });
+});
+
+/* ===== Helpers ===== */
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+  if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
+  return (b / 1073741824).toFixed(2) + ' GB';
+}
+
+async function api(url, opts = {}) {
+  try {
+    const r = await fetch(url, opts);
+    return await r.json();
+  } catch (e) {
+    toast('Ошибка соединения с сервером', 'error');
+    return null;
+  }
+}
+
+/* ===== Status ===== */
+async function refreshStatus() {
+  const d = await api('/api/status');
+  if (!d) return;
+
+  const badge = document.getElementById('status-badge');
+  const text = document.getElementById('status-text');
+  if (d.status === 'active') {
+    badge.className = 'status-badge active';
+    text.textContent = 'Активен';
+  } else {
+    badge.className = 'status-badge stopped';
+    text.textContent = 'Остановлен';
+  }
+
+  document.getElementById('cpu-temp').textContent = d.cpu_temp !== 'N/A' ? d.cpu_temp + '°C' : '—';
+  const mem = d.memory;
+  document.getElementById('mem-usage').textContent = mem.total ? `${mem.used}/${mem.total} MB` : '—';
+  document.getElementById('cpu-load').textContent = d.load !== 'N/A' ? d.load : '—';
+  const net = d.network;
+  document.getElementById('net-traffic').textContent = `↓${formatBytes(net.rx_bytes)} ↑${formatBytes(net.tx_bytes)}`;
+  document.getElementById('uptime').textContent = d.uptime || '—';
+
+  gatewayIP = d.local_ip || '192.168.1.1';
+  activeArgs = d.active_strategy_args || '';
+
+  document.getElementById('gw-ip-info').textContent = gatewayIP;
+  document.querySelectorAll('.gw-ip').forEach(el => el.textContent = gatewayIP);
+
+  // Clients table
+  const tbody = document.getElementById('clients-table');
+  if (d.clients && d.clients.length > 0) {
+    tbody.innerHTML = d.clients.map((c, i) =>
+      `<tr><td>${i + 1}</td><td>${c.ip}</td><td style="font-family:monospace;color:var(--accent3)">${c.mac}</td></tr>`
+    ).join('');
+  } else {
+    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text3)">Нет подключённых устройств</td></tr>';
+  }
+}
+
+/* ===== Service Control ===== */
+async function zapretAction(action) {
+  const names = { start: 'Запуск', stop: 'Остановка', restart: 'Перезапуск' };
+  toast(`${names[action] || action}...`, 'info');
+  const d = await api(`/api/${action}`, { method: 'POST' });
+  if (!d) return;
+  if (d.success) {
+    toast(`${names[action]} выполнен успешно`, 'success');
+  } else {
+    toast(`Ошибка: ${d.message || 'неизвестная'}`, 'error');
+  }
+  setTimeout(refreshStatus, 1000);
+}
+
+/* ===== Strategies ===== */
+async function loadStrategies() {
+  const d = await api('/api/strategies');
+  if (!d) return;
+  activeArgs = d.active_args || '';
+  const grid = document.getElementById('strategies-grid');
+  const strategies = d.strategies || {};
+  const keys = Object.keys(strategies);
+
+  if (keys.length === 0) {
+    grid.innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--text3);padding:40px">Нет стратегий</div>';
+    return;
+  }
+
+  grid.innerHTML = keys.map(key => {
+    const s = strategies[key];
+    const isActive = activeArgs && s.args === activeArgs;
+    return `
+      <div class="card strategy-card ${isActive ? 'active-strategy' : ''}">
+        <div class="badge-active">✓ Активна</div>
+        <div class="strategy-name">${esc(s.name)}</div>
+        <div class="strategy-desc">${esc(s.description)}</div>
+        <div class="strategy-args">${esc(s.args)}</div>
+        <div class="strategy-actions">
+          <button class="btn btn-accent btn-sm" onclick="applyStrategy('${esc(s.args)}')">⚡ Применить</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyArgs('${esc(s.args)}')">📋 Копировать</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteStrategy('${key}')">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+}
+
+async function applyStrategy(args) {
+  if (!confirm('Применить эту стратегию? Zapret будет перезапущен.')) return;
+  toast('Применение стратегии...', 'info');
+  // Unescape HTML entities for the request
+  const ta = document.createElement('textarea');
+  ta.innerHTML = args;
+  const cleanArgs = ta.value;
+  const d = await api('/api/apply-strategy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ args: cleanArgs })
+  });
+  if (!d) return;
+  if (d.success) {
+    toast('Стратегия применена', 'success');
+    loadStrategies();
+    setTimeout(refreshStatus, 1500);
+  } else {
+    toast('Ошибка: ' + (d.message || ''), 'error');
+  }
+}
+
+function copyArgs(args) {
+  const ta = document.createElement('textarea');
+  ta.innerHTML = args;
+  navigator.clipboard.writeText(ta.value).then(() => toast('Аргументы скопированы', 'success'));
+}
+
+async function deleteStrategy(key) {
+  if (!confirm('Удалить стратегию?')) return;
+  const d = await api(`/api/strategies/${key}`, { method: 'DELETE' });
+  if (d && d.success) {
+    toast('Стратегия удалена', 'success');
+    loadStrategies();
+  } else {
+    toast('Ошибка удаления', 'error');
+  }
+}
+
+/* ===== Add Strategy Modal ===== */
+function openAddModal() {
+  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('m-key').value = '';
+  document.getElementById('m-name').value = '';
+  document.getElementById('m-desc').value = '';
+  document.getElementById('m-args').value = '';
+  document.getElementById('m-key').focus();
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+async function saveStrategy() {
+  const key = document.getElementById('m-key').value.trim();
+  const name = document.getElementById('m-name').value.trim();
+  const desc = document.getElementById('m-desc').value.trim();
+  const args = document.getElementById('m-args').value.trim();
+  if (!key || !name || !args) {
+    toast('Заполните обязательные поля', 'error');
+    return;
+  }
+  const d = await api('/api/strategies', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, name, description: desc, args })
+  });
+  if (d && d.success) {
+    toast('Стратегия сохранена', 'success');
+    closeModal();
+    loadStrategies();
+  } else {
+    toast('Ошибка: ' + (d ? d.message : ''), 'error');
+  }
+}
+
+/* ===== Logs ===== */
+async function loadLogs() {
+  const viewer = document.getElementById('log-viewer');
+  viewer.textContent = 'Загрузка...';
+  const d = await api('/api/logs');
+  if (d) {
+    viewer.textContent = d.logs || 'Логи пусты';
+    viewer.scrollTop = viewer.scrollHeight;
+  }
+}
+
+/* ===== Diagnostics ===== */
+async function runDiagnostics() {
+  toast('Запуск диагностики...', 'info');
+  const d = await api('/api/run-diagnostics', { method: 'POST' });
+  if (!d) return;
+  const viewer = document.getElementById('log-viewer');
+  viewer.textContent = '=== РЕЗУЛЬТАТЫ ДИАГНОСТИКИ ===\n\n' + (d.result || 'Нет данных');
+  viewer.scrollTop = 0;
+  if (d.success) toast('Диагностика завершена', 'success');
+  else toast('Диагностика: обнаружены проблемы', 'error');
+}
+
+/* ===== Network ===== */
+async function loadNetwork() {
+  const d = await api('/api/gateway-status');
+  if (!d) return;
+  document.getElementById('nat-rules').textContent = d.nat_rules || 'Нет данных';
+  document.getElementById('mangle-rules').textContent = d.mangle_rules || 'Нет данных';
+  const fwdBadge = document.getElementById('ip-fwd-badge');
+  if (d.ip_forward) {
+    fwdBadge.className = 'ip-fwd-badge on';
+    fwdBadge.textContent = '✓ IP Forwarding: Включён';
+  } else {
+    fwdBadge.className = 'ip-fwd-badge off';
+    fwdBadge.textContent = '✗ IP Forwarding: Выключен';
+  }
+}
+
+/* ===== AdGuard ===== */
+async function loadAdguard() {
+  const d = await api('/api/adguard-status');
+  const el = document.getElementById('adguard-info');
+  if (!d) { el.textContent = 'Не удалось проверить'; return; }
+  if (d.running) {
+    el.innerHTML = `<span style="color:var(--green);font-weight:600">✓ Запущен</span> — <a href="${d.url}" target="_blank">Открыть панель AdGuard Home →</a>`;
+  } else {
+    el.innerHTML = '<span style="color:var(--text3)">Не установлен или не запущен</span>';
+  }
+}
+
+/* ===== Clock ===== */
+function updateClock() {
+  const now = new Date();
+  document.getElementById('header-time').textContent = now.toLocaleString('ru-RU', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+}
+
+/* ===== Init ===== */
+refreshStatus();
+updateClock();
+setInterval(updateClock, 1000);
+statusInterval = setInterval(refreshStatus, 15000);
+</script>
+</body>
+</html>

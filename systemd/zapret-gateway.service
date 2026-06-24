@@ -1,0 +1,14 @@
+[Unit]
+Description=Zapret-Pi Gateway (NAT/NFQUEUE)
+After=network-online.target zapret.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/zapret-pi/gateway-setup.sh
+ExecStop=/sbin/iptables -t nat -F
+ExecStop=/sbin/iptables -t mangle -F
+
+[Install]
+WantedBy=multi-user.target

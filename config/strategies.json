@@ -1,0 +1,27 @@
+{
+  "universal_md5sig": {
+    "name": "Универсальная (md5sig)",
+    "description": "Fake + FakedSplit с MD5 Signature fooling. Работает на большинстве провайдеров РФ.",
+    "args": "--dpi-desync=fake,fakedsplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=2 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol"
+  },
+  "ttl_based": {
+    "name": "TTL-based (TTL=6)",
+    "description": "Fake + MultiDisorder с TTL fooling. Подбери значение TTL (4-12) под свой DPI.",
+    "args": "--dpi-desync=fake,multidisorder --dpi-desync-fooling=md5sig,badseq --dpi-desync-split-pos=midsld --dpi-desync-split-seqovl=2 --dpi-desync-ttl=6 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol"
+  },
+  "fakeddisorder": {
+    "name": "FakedDisorder (продвинутая)",
+    "description": "Перемешивание фейков с оригиналами в обратном порядке. Для сложных DPI.",
+    "args": "--dpi-desync=fake,fakeddisorder --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=3 --dpi-desync-repeats=6 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol --dpi-desync-fakedsplit-mod=altorder=1"
+  },
+  "hostfakesplit": {
+    "name": "HostFakeSplit (минимальная)",
+    "description": "Минимальное вмешательство — фейкование только hostname. Наименьшее влияние на скорость.",
+    "args": "--dpi-desync=fake,hostfakesplit --dpi-desync-fooling=md5sig --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol"
+  },
+  "multisplit_seqovl": {
+    "name": "MultiSplit + SeqOvl",
+    "description": "Множественная нарезка с перекрытием sequence numbers. Для ТСПУ.",
+    "args": "--dpi-desync=fake,multisplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=5 --dpi-desync-split-seqovl-pattern=0x1603030000 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol"
+  }
+}

@@ -1,0 +1,147 @@
+# ============================================
+# Zapret-Pi: Blocked Domains List
+# Домены, заблокированные или замедляемые в РФ
+# ============================================
+
+# --- YouTube ---
+youtube.com
+www.youtube.com
+m.youtube.com
+music.youtube.com
+tv.youtube.com
+youtu.be
+googlevideo.com
+ytimg.com
+i.ytimg.com
+s.ytimg.com
+yt3.ggpht.com
+ggpht.com
+youtube-nocookie.com
+wide-youtube.l.google.com
+youtube-ui.l.google.com
+youtubeembeddedsearch.googleapis.com
+youtube.googleapis.com
+youtubei.googleapis.com
+
+# --- Google ---
+google.com
+www.google.com
+google.ru
+www.google.ru
+googleapis.com
+gstatic.com
+www.gstatic.com
+fonts.gstatic.com
+googleusercontent.com
+lh3.googleusercontent.com
+accounts.google.com
+play.google.com
+dl.google.com
+
+# --- Discord ---
+discord.com
+www.discord.com
+discord.gg
+discordapp.com
+cdn.discordapp.com
+discord.media
+images-ext-1.discordapp.net
+images-ext-2.discordapp.net
+discordcdn.com
+media.discordapp.net
+gateway.discord.gg
+
+# --- Instagram / Meta ---
+instagram.com
+www.instagram.com
+cdninstagram.com
+scontent.cdninstagram.com
+facebook.com
+www.facebook.com
+fbcdn.net
+scontent.fbcdn.net
+static.fbcdn.net
+meta.com
+www.meta.com
+threads.net
+www.threads.net
+whatsapp.com
+www.whatsapp.com
+web.whatsapp.com
+whatsapp.net
+mmg.whatsapp.net
+
+# --- Twitter / X ---
+twitter.com
+www.twitter.com
+x.com
+www.x.com
+twimg.com
+pbs.twimg.com
+abs.twimg.com
+t.co
+api.twitter.com
+api.x.com
+
+# --- Spotify ---
+spotify.com
+www.spotify.com
+open.spotify.com
+accounts.spotify.com
+spotifycdn.com
+scdn.co
+i.scdn.co
+seed-mix-image.spotifycdn.com
+
+# --- LinkedIn ---
+linkedin.com
+www.linkedin.com
+licdn.com
+static.licdn.com
+media.licdn.com
+
+# --- Gaming / EA ---
+ea.com
+www.ea.com
+accounts.ea.com
+gateway.ea.com
+origin.com
+www.origin.com
+battlefield.com
+www.battlefield.com
+eafc.com
+www.eafc.com
+steampowered.com
+store.steampowered.com
+steamcommunity.com
+cdn.steamstatic.com
+epicgames.com
+www.epicgames.com
+store.epicgames.com
+
+# --- Other ---
+medium.com
+www.medium.com
+archive.org
+www.archive.org
+web.archive.org
+soundcloud.com
+www.soundcloud.com
+patreon.com
+www.patreon.com
+viber.com
+www.viber.com
+telegra.ph
+notion.so
+www.notion.so
+figma.com
+www.figma.com
+
+# --- CDN ---
+akamaihd.net
+akamai.net
+cloudfront.net
+fastly.net
+cloudflare.com
+cdnjs.cloudflare.com
+edgecastcdn.net
