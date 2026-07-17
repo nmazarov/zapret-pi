@@ -175,7 +175,7 @@ install_deps() {
 
     local deps=(
         git make gcc libc-dev
-        libnetfilter-queue-dev libcap-dev zlib1g-dev
+        libnetfilter-queue-dev libcap-dev zlib1g-dev libmnl-dev
         iptables nftables conntrack
         curl wget dnsutils net-tools
         python3 python3-pip python3-venv
