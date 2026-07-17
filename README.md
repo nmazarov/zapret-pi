@@ -5,96 +5,28 @@
 <h1 align="center">🛡️ Zapret-Pi</h1>
 
 <p align="center">
-  <strong>Обход DPI + Блокировка рекламы на Raspberry Pi 4</strong><br/>
+  <strong>Обход DPI-блокировок + Блокировка рекламы на Raspberry Pi</strong><br/>
   Один скрипт — и все устройства в сети работают без ограничений
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License MIT"/>
-  <img src="https://img.shields.io/badge/platform-Raspberry%20Pi%204-c51a4a?style=flat-square&logo=raspberry-pi" alt="Platform"/>
+  <img src="https://img.shields.io/badge/platform-Raspberry%20Pi-c51a4a?style=flat-square&logo=raspberry-pi" alt="Platform"/>
   <img src="https://img.shields.io/badge/language-Bash%20%7C%20Python-blue?style=flat-square" alt="Language"/>
   <img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/zapret-v69+-orange?style=flat-square" alt="Zapret"/>
 </p>
 
 ---
 
 ## 📋 Что это?
 
-**Zapret-Pi** превращает Raspberry Pi 4 в сетевой шлюз, который:
+**Zapret-Pi** превращает Raspberry Pi в сетевой шлюз, который:
 
-- 🔓 **Обходит DPI-блокировки** (YouTube, Discord, Instagram, Twitter и др.)
+- 🔓 **Обходит DPI-блокировки** — YouTube, Discord, Instagram, Twitter, EA серверы и другие
 - 🚫 **Блокирует рекламу** на всех устройствах через AdGuard Home
-- 🌐 **Работает для всей сети** — PS5, ПК, Smart TV, телефоны
-- ⚡ **Без VPN** — нативная скорость без потерь
-
-> **Просто подключи устройство к Raspberry Pi и забудь о блокировках.**
-
----
-
-## ✨ Возможности
-
-| Функция | Описание |
-|---------|----------|
-| 🔓 Обход DPI | Zapret `nfqws` — фейковые пакеты, нарезка TLS, подмена SNI |
-| 🚫 Блокировка рекламы | AdGuard Home — DNS-level фильтрация для всей сети |
-| 🎮 PS5 / Xbox | Работает без настройки — достаточно указать DNS |
-| 📺 Smart TV | Samsung, LG, Android TV — YouTube без тормозов |
-| 🌐 Веб-панель | Управление через браузер на порте `8080` |
-| 📊 Мониторинг | Grafana-дашборд с метриками на порте `3000` |
-| 🔄 Стратегии | 5 предустановленных стратегий обхода + кастомные |
-| 📋 Логирование | Полные логи nfqws, iptables, DNS-запросов |
-| 🛡️ Auto-update | Автообновление списков блокировок |
-
----
-
-## 🏗️ Архитектура
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Домашняя сеть                        │
-│                                                         │
-│   ┌─────┐  ┌─────┐  ┌──────────┐  ┌──────────────┐    │
-│   │ PS5 │  │ PC  │  │ Smart TV │  │ Телефон/Планш│    │
-│   └──┬──┘  └──┬──┘  └────┬─────┘  └──────┬───────┘    │
-│      │        │           │               │             │
-│      └────────┴─────┬─────┴───────────────┘             │
-│                     │                                    │
-│              ┌──────▼──────┐                            │
-│              │   Роутер    │                            │
-│              │ 192.168.1.1 │                            │
-│              └──────┬──────┘                            │
-│                     │                                    │
-│           ┌─────────▼──────────┐                        │
-│           │   Raspberry Pi 4   │                        │
-│           │   192.168.1.10     │                        │
-│           │                    │                        │
-│           │  ┌──────────────┐  │                        │
-│           │  │ AdGuard Home │  │  DNS: порт 53         │
-│           │  │  (DNS + Ads) │  │  Веб: порт 8080      │
-│           │  └──────┬───────┘  │                        │
-│           │         │          │                        │
-│           │  ┌──────▼───────┐  │                        │
-│           │  │   iptables   │  │  NAT + NFQUEUE        │
-│           │  │  (NFQUEUE)   │  │                        │
-│           │  └──────┬───────┘  │                        │
-│           │         │          │                        │
-│           │  ┌──────▼───────┐  │                        │
-│           │  │    nfqws     │  │  DPI bypass           │
-│           │  │   (zapret)   │  │                        │
-│           │  └──────┬───────┘  │                        │
-│           │         │          │                        │
-│           │  ┌──────▼───────┐  │                        │
-│           │  │   Grafana    │  │  Мониторинг: 3000     │
-│           │  └──────────────┘  │                        │
-│           └────────────────────┘                        │
-│                     │                                    │
-│              ┌──────▼──────┐                            │
-│              │  Интернет   │                            │
-│              │   (ISP)     │                            │
-│              └─────────────┘                            │
-└─────────────────────────────────────────────────────────┘
-```
+- 🎮 **Работает для всех устройств** — PS5, ПК, Smart TV, телефоны
+- ⚡ **Без VPN** — нативная скорость, минимальный пинг
+- 🖥️ **Веб-панель** — управление через браузер
 
 ---
 
@@ -102,126 +34,161 @@
 
 ### Требования
 
-- Raspberry Pi 4 (2GB+ RAM) с Raspberry Pi OS Lite (64-bit)
+- Raspberry Pi (2+ ГБ RAM) с Raspberry Pi OS / Debian / Ubuntu
 - Ethernet-подключение к роутеру
-- SSH-доступ к Raspberry Pi
+- SSH-доступ
 
-### Установка за 3 команды
+### Установка
 
 ```bash
-git clone https://github.com/user/zapret-pi.git
+git clone https://github.com/nmazarov/zapret-pi.git
 cd zapret-pi
-sudo ./install.sh
+sudo bash install.sh
 ```
 
-> **Установщик автоматически:**
-> - Установит Zapret, AdGuard Home, Grafana
-> - Настроит NAT, iptables, NFQUEUE
-> - Применит оптимальную стратегию обхода
-> - Запустит веб-панель управления
+**Всё.** Скрипт автоматически:
+- Определит сеть (IP, роутер, интерфейс)
+- Установит и соберёт Zapret
+- Установит AdGuard Home
+- Настроит NAT, iptables, NFQUEUE
+- Развернёт веб-панель
+- Запустит все сервисы
+- Покажет инструкции для подключения устройств
 
-После установки откройте в браузере:
+### Удаление
 
-| Панель | Адрес | Назначение |
-|--------|-------|------------|
-| Веб-панель | `http://192.168.1.10:8080` | Управление Zapret-Pi |
-| AdGuard Home | `http://192.168.1.10:3000` | DNS и блокировка рекламы |
-| Grafana | `http://192.168.1.10:3001` | Мониторинг и метрики |
+```bash
+cd zapret-pi
+sudo bash uninstall.sh
+```
 
 ---
 
-## ⚙️ Как это работает
-
-### Обход DPI (Deep Packet Inspection)
-
-Российские провайдеры используют **ТСПУ** (Технические Средства Противодействия Угрозам) для анализа и блокировки трафика. Zapret обходит это с помощью модификации пакетов на лету:
-
-1. **Fake-пакеты** — отправка фальшивого ClientHello с TTL, который не дойдёт до сервера, но «обманет» DPI
-2. **FakedSplit** — нарезка TLS-пакета так, что SNI оказывается разделён между фрагментами
-3. **MD5 Signature Fooling** — добавление неверной TCP MD5 Signature Option, которую DPI проверяет, а сервер игнорирует
-4. **Sequence Overlap** — перекрытие TCP sequence numbers для запутывания реассемблера DPI
+## 🏗️ Архитектура
 
 ```
-Без Zapret:    [ClientHello: youtube.com] ──→ DPI ──✗ BLOCKED
-С Zapret:      [Fake SNI] + [Split1][Split2] ──→ DPI ──→ ✓ OK
+  PS5 / ПК / TV / Телефон
+         │
+         │  шлюз + DNS = IP малинки
+         ▼
+  ┌─────────────────────────┐
+  │     Raspberry Pi        │
+  │                         │
+  │  ┌───────────────────┐  │
+  │  │   AdGuard Home    │  │  DNS :53 → блокировка рекламы
+  │  └────────┬──────────┘  │
+  │           │              │
+  │  ┌────────▼──────────┐  │
+  │  │  iptables/NFQUEUE │  │  NAT + перехват пакетов
+  │  └────────┬──────────┘  │
+  │           │              │
+  │  ┌────────▼──────────┐  │
+  │  │   nfqws (Zapret)  │  │  DPI bypass
+  │  └────────┬──────────┘  │
+  │           │              │
+  │  ┌────────▼──────────┐  │
+  │  │    Веб-панель     │  │  :8080 → управление
+  │  └──────────────────┘  │
+  └────────────┬────────────┘
+               │
+               ▼
+       Роутер → Интернет
 ```
-
-### Блокировка рекламы
-
-AdGuard Home работает как DNS-сервер для всей сети. Все DNS-запросы проходят через него, и рекламные домены блокируются на уровне DNS — ещё до загрузки контента.
 
 ---
 
 ## 🎮 Настройка устройств
 
-Достаточно указать Raspberry Pi как **DNS-сервер** (и, при необходимости, как **шлюз**) на устройстве:
+После установки скрипт покажет IP малинки. Укажите его как **шлюз** и **DNS** на устройствах:
 
-| Устройство | DNS | Шлюз | Инструкция |
-|------------|-----|------|------------|
-| **PS5** | `192.168.1.10` | `192.168.1.10` | Настройки → Сеть → Настроить подключение → Вручную |
-| **Windows PC** | `192.168.1.10` | `192.168.1.10` | Панель управления → Сетевые подключения → IPv4 |
-| **macOS** | `192.168.1.10` | `192.168.1.10` | Системные настройки → Сеть → DNS |
-| **Smart TV** | `192.168.1.10` | `192.168.1.10` | Настройки сети → Ручная настройка IP |
-| **iPhone/Android** | `192.168.1.10` | — | Wi-Fi → Настройки сети → DNS (вручную) |
-| **Роутер (всё)** | — | — | DHCP → DNS-сервер: `192.168.1.10` |
+| Устройство | Где настроить | Шлюз | DNS |
+|------------|--------------|------|-----|
+| **PS5 / PS4** | Настройки → Сеть → Вручную | IP малинки | IP малинки |
+| **Windows** | Сетевые настройки → IPv4 | IP малинки | IP малинки |
+| **Smart TV** | Настройки сети → Ручной IP | IP малинки | IP малинки |
+| **Android** | Wi-Fi → Статический IP | IP малинки | IP малинки |
+| **iPhone** | Wi-Fi → Настройка IP → Вручную | IP малинки | IP малинки |
 
-> 💡 **Совет:** Настройте DNS на роутере — тогда все устройства автоматически будут использовать Zapret-Pi.
+> 💡 **Совет:** Настройте DNS на роутере (DHCP → DNS-сервер = IP малинки) — тогда все устройства будут использовать Zapret-Pi автоматически.
 
 ---
 
-## 🎯 Стратегии обхода
+## 🌐 Панели управления
 
-Zapret-Pi поставляется с 5 предустановленными стратегиями. Переключайте их через веб-панель или CLI:
+| Панель | Адрес | Назначение |
+|--------|-------|------------|
+| **Zapret веб-панель** | `http://IP_МАЛИНКИ:8080` | Стратегии, логи, мониторинг |
+| **AdGuard Home** | `http://IP_МАЛИНКИ:3000` | DNS-фильтрация, блокировка рекламы |
 
-| # | Стратегия | Описание | Для кого |
-|---|-----------|----------|----------|
-| 1 | **Универсальная (md5sig)** | Fake + FakedSplit + MD5Sig | Большинство провайдеров |
-| 2 | **TTL-based** | Fake + MultiDisorder + TTL | Когда md5sig не работает |
-| 3 | **FakedDisorder** | Перемешивание фейков в обратном порядке | Сложные DPI (ТСПУ v2) |
-| 4 | **HostFakeSplit** | Минимальная — только hostname | Минимальное влияние на скорость |
-| 5 | **MultiSplit + SeqOvl** | Множественная нарезка + SeqOvl | Самые жёсткие DPI |
+---
 
-### Переключение через CLI
+## 🎯 Стратегии обхода DPI
 
-```bash
-# Посмотреть текущую стратегию
-sudo zapret-pi status
+5 предустановленных стратегий, переключаются через веб-панель:
 
-# Сменить стратегию
-sudo zapret-pi strategy universal_md5sig
-sudo zapret-pi strategy ttl_based
-sudo zapret-pi strategy fakeddisorder
+| Стратегия | Описание | Когда использовать |
+|-----------|----------|-------------------|
+| **Универсальная (md5sig)** | Fake + FakedSplit + MD5Sig | По умолчанию, подходит большинству |
+| **TTL-based** | Fake + MultiDisorder + TTL | Если md5sig не помогает |
+| **FakedDisorder** | Перемешивание фейков | Сложные DPI (ТСПУ v2) |
+| **HostFakeSplit** | Минимальная модификация | Минимальный пинг для игр |
+| **MultiSplit + SeqOvl** | Множественная нарезка | Самые жёсткие DPI |
 
-# Тест стратегии на конкретном домене
-sudo zapret-pi test youtube.com
-```
-
-### Кастомная стратегия
-
-Отредактируйте файл `/opt/zapret-pi/config/default.conf`:
+### Подбор стратегии
 
 ```bash
-NFQWS_OPT="--filter-tcp=80,443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=md5sig ..."
+# Автоматический подбор рабочей стратегии для вашего провайдера
+cd /opt/zapret
+sudo ./blockcheck.sh
 ```
 
 ---
 
-## 🌐 Веб-панель
+## 📂 Структура проекта
 
-Веб-панель доступна на порте **8080** и позволяет:
+```
+zapret-pi/
+├── install.sh              # Автоустановщик (sudo bash install.sh)
+├── uninstall.sh            # Удаление (sudo bash uninstall.sh)
+├── config/
+│   ├── default.conf        # Конфиг Zapret (nfqws)
+│   ├── strategies.json     # 5 стратегий DPI bypass
+│   ├── hosts-blocked.txt   # Заблокированные домены РФ
+│   └── sysctl.conf         # Параметры ядра
+├── scripts/
+│   ├── gateway-setup.sh    # NAT / iptables / NFQUEUE
+│   ├── test-connection.sh  # Диагностика
+│   └── detect-network.sh   # Автоопределение сети
+├── web/
+│   ├── app.py              # Flask API (backend)
+│   └── static/
+│       └── index.html      # Веб-панель (frontend)
+└── systemd/
+    ├── zapret-gateway.service
+    └── zapret-web.service
+```
 
-- 📊 Видеть статус всех сервисов (Zapret, AdGuard, NAT)
-- 🔄 Переключать стратегии обхода одним кликом
-- 📋 Просматривать логи nfqws в реальном времени
-- ✏️ Редактировать список доменов
-- 🔧 Управлять настройками без SSH
+---
 
-**Grafana** на порте **3000** предоставляет:
+## 🔧 Полезные команды
 
-- График DNS-запросов в секунду
-- Статистику заблокированной рекламы
-- Нагрузку на CPU/RAM Raspberry Pi
-- Количество обработанных пакетов nfqws
+```bash
+# Статус всех сервисов
+sudo systemctl status zapret zapret-gateway zapret-web
+
+# Перезапуск
+sudo systemctl restart zapret zapret-gateway
+
+# Логи nfqws
+sudo journalctl -u zapret -f
+
+# Диагностика
+sudo bash /opt/zapret-pi/test-connection.sh
+
+# Проверка iptables
+sudo iptables -t mangle -L -n
+sudo iptables -t nat -L -n
+```
 
 ---
 
@@ -229,137 +196,55 @@ NFQWS_OPT="--filter-tcp=80,443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling
 
 | Проблема | Решение |
 |----------|---------|
-| YouTube не открывается | Проверь DNS: `nslookup youtube.com 192.168.1.10` |
-| Видео буферится | Смени стратегию на `ttl_based` или `fakeddisorder` |
-| Нет интернета | Проверь NAT: `sudo iptables -t nat -L` |
-| nfqws не запускается | Проверь лог: `journalctl -u zapret -f` |
-| Высокий пинг | Используй `hostfakesplit` (минимальное вмешательство) |
-| PS5 не подключается | Проверь шлюз: должен быть IP Raspberry Pi |
-| AdGuard не блокирует | Проверь, что DNS устройства указывает на Pi |
-| Веб-панель недоступна | `sudo systemctl status zapret-web` |
-| После обновления сломалось | `sudo zapret-pi reset && sudo zapret-pi apply` |
-| Работает, но медленно | Проверь `htop` — возможно, мало RAM |
-
-### Полезные команды
-
-```bash
-# Статус всех сервисов
-sudo zapret-pi status
-
-# Перезапуск всего
-sudo zapret-pi restart
-
-# Логи nfqws в реальном времени
-sudo journalctl -u zapret -f
-
-# Проверка iptables
-sudo iptables -t nat -L -n -v
-sudo iptables -t mangle -L -n -v
-
-# Тест обхода
-curl -v --resolve youtube.com:443:216.58.209.174 https://youtube.com
-```
+| YouTube не открывается | Смени стратегию через веб-панель |
+| Нет интернета после настройки | Проверь: `sudo iptables -t nat -L` и `sysctl net.ipv4.ip_forward` |
+| nfqws не запущен | `sudo systemctl restart zapret && journalctl -u zapret -e` |
+| Высокий пинг в играх | Используй стратегию «HostFakeSplit» (минимальная) |
+| PS5 не подключается | Убедись что шлюз = IP малинки |
+| Реклама не блокируется | Проверь DNS: `nslookup ad.doubleclick.net IP_МАЛИНКИ` |
+| Веб-панель не открывается | `sudo systemctl restart zapret-web` |
 
 ---
 
 ## ❓ FAQ
 
-<details>
-<summary><strong>Будет ли работать на Raspberry Pi 3?</strong></summary>
+**Q: Это VPN?**
+Нет. Zapret работает локально — модифицирует пакеты так, чтобы DPI провайдера не мог их распознать. Трафик идёт напрямую, без серверов-посредников. Пинг не увеличивается.
 
-Технически да, но Pi 3 значительно медленнее. Для сети с 1–2 устройствами хватит, для 5+ рекомендуется Pi 4.
-</details>
+**Q: Замедляет ли интернет?**
+Нет. Zapret обрабатывает только первые 6-12 пакетов каждого соединения (хэндшейк). Остальной трафик проходит без обработки.
 
-<details>
-<summary><strong>Это VPN?</strong></summary>
+**Q: Работает с любым провайдером?**
+У каждого провайдера свой DPI. Поэтому нужно подобрать стратегию — используй `blockcheck.sh` или переключай стратегии в веб-панели.
 
-Нет. Zapret-Pi не шифрует трафик и не туннелирует его через сторонний сервер. Весь трафик идёт напрямую к серверам назначения, но пакеты модифицируются на лету для обхода DPI.
-</details>
-
-<details>
-<summary><strong>Замедлит ли это интернет?</strong></summary>
-
-Практически нет. nfqws работает на уровне ядра и добавляет ~1-2ms задержки. Пропускная способность остаётся нативной (до 1 Gbps на Pi 4).
-</details>
-
-<details>
-<summary><strong>Безопасно ли это?</strong></summary>
-
-Zapret модифицирует только TCP/TLS-заголовки для обхода DPI. Содержимое трафика не изменяется. Однако использование инструментов обхода блокировок может противоречить законодательству вашей юрисдикции.
-</details>
-
-<details>
-<summary><strong>Как добавить новый домен?</strong></summary>
-
-Через веб-панель или вручную:
-```bash
-echo "newdomain.com" >> /opt/zapret-pi/config/hosts-blocked.txt
-sudo zapret-pi reload
-```
-</details>
-
-<details>
-<summary><strong>Как обновить Zapret?</strong></summary>
-
-```bash
-cd /opt/zapret-pi
-git pull
-sudo ./install.sh --update
-```
-</details>
-
-<details>
-<summary><strong>Можно ли использовать с Wi-Fi?</strong></summary>
-
-Можно, но Ethernet надёжнее и быстрее. При использовании Wi-Fi укажите `IFACE_WAN=wlan0` в конфиге.
-</details>
+**Q: Можно использовать без Raspberry Pi?**
+Да, скрипт работает на любом Debian/Ubuntu. Можно использовать VPS, старый ПК, или любой ARM SBC.
 
 ---
 
 ## 🤝 Contributing
 
-Вклад приветствуется! Вот как можно помочь:
+1. Fork репозитория
+2. Создай ветку: `git checkout -b feature/my-feature`
+3. Commit: `git commit -m 'Add my feature'`
+4. Push: `git push origin feature/my-feature`
+5. Открой Pull Request
 
-1. 🍴 **Fork** — форкните репозиторий
-2. 🌿 **Branch** — создайте ветку для фичи (`git checkout -b feature/my-feature`)
-3. ✍️ **Commit** — закоммитьте изменения (`git commit -m 'feat: add my feature'`)
-4. 📤 **Push** — запушьте ветку (`git push origin feature/my-feature`)
-5. 🔀 **PR** — откройте Pull Request
-
-### Что можно улучшить
-
-- [ ] Поддержка Orange Pi / Banana Pi
-- [ ] Автоопределение оптимальной стратегии
-- [ ] Интеграция с Telegram-ботом для уведомлений
-- [ ] Поддержка IPv6
-- [ ] Docker-контейнер
+Нашёл рабочую стратегию для своего провайдера? Поделись в [Issues](https://github.com/nmazarov/zapret-pi/issues)!
 
 ---
 
 ## 📄 Лицензия
 
-Этот проект распространяется под лицензией **MIT**. Подробности в файле [LICENSE](LICENSE).
+MIT License — см. [LICENSE](LICENSE)
 
 ---
 
 ## 🙏 Credits
 
-- **[Zapret](https://github.com/bol-van/zapret)** by bol-van — ядро DPI bypass
-- **[AdGuard Home](https://github.com/AdguardTeam/AdGuardHome)** — DNS-фильтрация и блокировка рекламы
-- **[Grafana](https://grafana.com/)** — мониторинг и визуализация
+- [Zapret](https://github.com/bol-van/zapret) by bol-van — ядро DPI bypass
+- [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) — DNS-фильтрация
 
 ---
 
-## ⚠️ Disclaimer
-
-> Данный проект предоставляется «как есть» (**as is**) исключительно в образовательных и исследовательских целях.
->
-> Авторы **не несут ответственности** за использование данного ПО в целях, противоречащих законодательству вашей страны. Перед использованием убедитесь, что это не нарушает применимые законы и правила.
->
-> Проект **не аффилирован** с Zapret, AdGuard или Raspberry Pi Foundation.
-
----
-
-<p align="center">
-  <sub>Сделано с ❤️ для свободного интернета</sub>
-</p>
+> ⚠️ **Дисклеймер:** Проект предоставлен в образовательных целях. Использование может нарушать условия вашего провайдера.
