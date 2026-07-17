@@ -230,13 +230,19 @@ install_zapret_bins() {
 copy_config() {
     step "Шаг 5: Копирование конфигурации zapret..."
 
-    # Создаём директории если нет
-    mkdir -p /opt/zapret/config
+    # Создаём директорию для ipset
     mkdir -p /opt/zapret/ipset
 
+    # ВАЖНО: /opt/zapret/config должен быть ФАЙЛОМ, не папкой!
+    # zapret читает его как shell-конфиг
+    if [[ -d /opt/zapret/config ]]; then
+        warn "/opt/zapret/config — это папка, удаляем..."
+        rm -rf /opt/zapret/config
+    fi
+
     if [[ -f "$PROJECT_DIR/config/default.conf" ]]; then
-        cp -v "$PROJECT_DIR/config/default.conf" /opt/zapret/config/
-        ok "Конфигурация скопирована"
+        cp -v "$PROJECT_DIR/config/default.conf" /opt/zapret/config
+        ok "Конфигурация скопирована в /opt/zapret/config"
     else
         warn "config/default.conf не найден в проекте, пропуск"
     fi
