@@ -43,8 +43,7 @@ echo "    • Конфиг шлюза: /opt/zapret-pi/"
 echo "    • Правила iptables (NAT, mangle)"
 echo "    • Настройки sysctl"
 echo ""
-echo -e "  ${DIM}Zapret (/opt/zapret) и AdGuard Home (/opt/AdGuardHome)"
-echo -e "  будут удалены только если ты подтвердишь.${NC}"
+echo -e "  ${DIM}Zapret (/opt/zapret) будет удалён только если ты подтвердишь.${NC}"
 echo ""
 
 read -rp "  Продолжить удаление? [y/N]: " confirm
@@ -134,18 +133,6 @@ if [[ -d /opt/zapret ]]; then
     fi
 fi
 
-# ─── 8. AdGuard Home (опционально) ─────────────────────────────────────────
-if [[ -d /opt/AdGuardHome ]]; then
-    read -rp "  Удалить AdGuard Home (/opt/AdGuardHome)? [y/N]: " del_adguard
-    if [[ "$del_adguard" == "y" || "$del_adguard" == "Y" ]]; then
-        /opt/AdGuardHome/AdGuardHome -s stop 2>/dev/null || true
-        /opt/AdGuardHome/AdGuardHome -s uninstall 2>/dev/null || true
-        rm -rf /opt/AdGuardHome
-        ok "AdGuard Home удалён"
-    else
-        info "AdGuard Home оставлен"
-    fi
-fi
 
 # ─── Итог ───────────────────────────────────────────────────────────────────
 echo ""

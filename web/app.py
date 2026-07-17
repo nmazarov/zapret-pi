@@ -434,20 +434,6 @@ def api_blockcheck_result():
     return jsonify({"running": running, "result": result})
 
 
-# ---------------------------------------------------------------------------
-# API: AdGuard Home
-# ---------------------------------------------------------------------------
-
-@app.route("/api/adguard-status")
-def api_adguard_status():
-    rc, _, _ = _run("systemctl is-active AdGuardHome", timeout=5)
-    is_active = rc == 0
-    local_ip = _get_local_ip()
-    return jsonify({
-        "running": is_active,
-        "url": f"http://{local_ip}:3000" if is_active else None,
-    })
-
 
 # ---------------------------------------------------------------------------
 # API: Diagnostics

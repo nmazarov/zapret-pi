@@ -432,10 +432,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </table>
       </div>
     </div>
-    <div class="card" id="adguard-section">
-      <div class="card-title">🛡️ AdGuard Home</div>
-      <p style="font-size:.85rem;color:var(--text2)" id="adguard-info">Проверка...</p>
-    </div>
+
   </div>
 
   <!-- ==================== LOGS ==================== -->
@@ -523,7 +520,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     if (t === 'strategies') loadStrategies();
     else if (t === 'logs') loadLogs();
     else if (t === 'network') loadNetwork();
-    else if (t === 'clients') { refreshStatus(); loadAdguard(); }
+    else if (t === 'clients') { refreshStatus(); }
   });
 });
 
@@ -754,17 +751,6 @@ async function loadNetwork() {
   }
 }
 
-/* ===== AdGuard ===== */
-async function loadAdguard() {
-  const d = await api('/api/adguard-status');
-  const el = document.getElementById('adguard-info');
-  if (!d) { el.textContent = 'Не удалось проверить'; return; }
-  if (d.running) {
-    el.innerHTML = `<span style="color:var(--green);font-weight:600">✓ Запущен</span> — <a href="${d.url}" target="_blank">Открыть панель AdGuard Home →</a>`;
-  } else {
-    el.innerHTML = '<span style="color:var(--text3)">Не установлен или не запущен</span>';
-  }
-}
 
 /* ===== Clock ===== */
 function updateClock() {

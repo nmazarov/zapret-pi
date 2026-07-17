@@ -2,7 +2,7 @@
 ###############################################################################
 #  ╔═══════════════════════════════════════════════════════════════╗
 #  ║           ZAPRET-PI — Автоматический установщик              ║
-#  ║     Обход блокировок + AdGuard Home + Веб-панель             ║
+#  ║     Обход блокировок + Веб-панель                            ║
 #  ║           github.com/nmazarov/zapret-pi                      ║
 #  ╚═══════════════════════════════════════════════════════════════╝
 #
@@ -59,7 +59,7 @@ banner() {
     echo '   ║                     ╠═══╝ ║                             ║'
     echo '   ║                     ╩     ╩                             ║'
     echo '   ║                                                        ║'
-    echo '   ║       🛡️  DPI Bypass + AdBlock для Raspberry Pi         ║'
+    echo '   ║       🛡️  DPI Bypass для Raspberry Pi                   ║'
     echo '   ║       📺 PS5 · 🖥️ PC · 📱 Phone · 📺 Smart TV          ║'
     echo '   ║                                                        ║'
     echo '   ╚══════════════════════════════════════════════════════════╝'
@@ -75,7 +75,6 @@ show_help() {
     echo ""
     echo "  Опции:"
     echo "    --help          Показать эту справку"
-    echo "    --skip-adguard  Не устанавливать AdGuard Home"
     echo "    --skip-web      Не устанавливать веб-панель"
     echo ""
     echo "  Переменные окружения:"
@@ -87,13 +86,11 @@ show_help() {
 }
 
 # ─── Парсинг аргументов ─────────────────────────────────────────────────────
-SKIP_ADGUARD=0
 SKIP_WEB=0
 
 for arg in "$@"; do
     case "$arg" in
         --help|-h)      show_help ;;
-        --skip-adguard) SKIP_ADGUARD=1 ;;
         --skip-web)     SKIP_WEB=1 ;;
     esac
 done
@@ -174,7 +171,7 @@ detect_network() {
 # ═══════════════════════════════════════════════════════════════════════════════
 
 install_deps() {
-    step "📦 Шаг 1/10 — Установка зависимостей"
+    step "📦 Шаг 1/9 — Установка зависимостей"
 
     export DEBIAN_FRONTEND=noninteractive
 
@@ -201,7 +198,7 @@ install_deps() {
 # ═══════════════════════════════════════════════════════════════════════════════
 
 install_zapret() {
-    step "⚡ Шаг 2/10 — Установка Zapret"
+    step "⚡ Шаг 2/9 — Установка Zapret"
 
     # Клонирование
     if [[ -d /opt/zapret/.git ]]; then
@@ -239,7 +236,7 @@ install_zapret() {
 # ═══════════════════════════════════════════════════════════════════════════════
 
 configure_zapret() {
-    step "⚙️  Шаг 3/10 — Конфигурация Zapret"
+    step "⚙️  Шаг 3/9 — Конфигурация Zapret"
 
     mkdir -p /opt/zapret/ipset
 
@@ -296,7 +293,7 @@ CONF
 # ═══════════════════════════════════════════════════════════════════════════════
 
 configure_sysctl() {
-    step "🔧 Шаг 4/10 — Настройка маршрутизации"
+    step "🔧 Шаг 4/9 — Настройка маршрутизации"
 
     cat > /etc/sysctl.d/99-zapret-pi.conf << 'EOF'
 # zapret-pi: маршрутизация и conntrack
@@ -314,7 +311,7 @@ EOF
 # ═══════════════════════════════════════════════════════════════════════════════
 
 install_gateway() {
-    step "🌐 Шаг 5/10 — Настройка шлюза (NAT)"
+    step "🌐 Шаг 5/9 — Настройка шлюза (NAT)"
 
     mkdir -p /opt/zapret-pi
 
@@ -345,45 +342,19 @@ EOF
     done
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  ШАГ 6: ADGUARD HOME
-# ═══════════════════════════════════════════════════════════════════════════════
 
-install_adguard() {
-    if [[ "$SKIP_ADGUARD" == "1" ]]; then
-        step "🚫 Шаг 6/10 — AdGuard Home (пропущен)"
-        return
-    fi
-
-    step "🛡️  Шаг 6/10 — AdGuard Home (блокировка рекламы)"
-
-    if [[ -f /opt/AdGuardHome/AdGuardHome ]]; then
-        ok "AdGuard Home уже установлен"
-        return
-    fi
-
-    substep "Скачивание и установка AdGuard Home..."
-    curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v > /dev/null 2>&1
-
-    if [[ -f /opt/AdGuardHome/AdGuardHome ]]; then
-        ok "AdGuard Home установлен"
-    else
-        warn "Не удалось установить AdGuard Home (можно установить позже)"
-        ((ERRORS++))
-    fi
-}
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  ШАГ 7: ВЕБ-ПАНЕЛЬ
+#  ШАГ 6: ВЕБ-ПАНЕЛЬ
 # ═══════════════════════════════════════════════════════════════════════════════
 
 install_web_panel() {
     if [[ "$SKIP_WEB" == "1" ]]; then
-        step "🚫 Шаг 7/10 — Веб-панель (пропущен)"
+        step "🚫 Шаг 6/9 — Веб-панель (пропущен)"
         return
     fi
 
-    step "🖥️  Шаг 7/10 — Веб-панель управления"
+    step "🖥️  Шаг 6/9 — Веб-панель управления"
 
     mkdir -p /opt/zapret-web/static
 
@@ -416,11 +387,11 @@ install_web_panel() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  ШАГ 8: SYSTEMD СЕРВИСЫ
+#  ШАГ 7: SYSTEMD СЕРВИСЫ
 # ═══════════════════════════════════════════════════════════════════════════════
 
 install_services() {
-    step "🔄 Шаг 8/10 — Systemd сервисы"
+    step "🔄 Шаг 7/9 — Systemd сервисы"
 
     local installed=0
 
@@ -449,11 +420,11 @@ install_services() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  ШАГ 9: СТАТИЧЕСКИЙ IP
+#  ШАГ 8: СТАТИЧЕСКИЙ IP
 # ═══════════════════════════════════════════════════════════════════════════════
 
 configure_static_ip() {
-    step "📡 Шаг 9/10 — Статический IP"
+    step "📡 Шаг 8/9 — Статический IP"
 
     local dhcpcd="/etc/dhcpcd.conf"
     local marker="# === zapret-pi ==="
@@ -486,7 +457,7 @@ ${marker}
 interface ${IFACE_WAN}
 static ip_address=${RPI_IP}/24
 static routers=${ROUTER_IP}
-static domain_name_servers=127.0.0.1 8.8.8.8
+# static domain_name_servers=${ROUTER_IP} 8.8.8.8
 
 EOF
 
@@ -494,11 +465,11 @@ EOF
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  ШАГ 10: ЗАПУСК ВСЕГО
+#  ШАГ 9: ЗАПУСК ВСЕГО
 # ═══════════════════════════════════════════════════════════════════════════════
 
 start_everything() {
-    step "🚀 Шаг 10/10 — Запуск сервисов"
+    step "🚀 Шаг 9/9 — Запуск сервисов"
 
     # Zapret (nfqws)
     if systemctl is-enabled zapret.service > /dev/null 2>&1; then
@@ -515,10 +486,7 @@ start_everything() {
         systemctl restart zapret-web.service 2>/dev/null && ok "Веб-панель запущена" || warn "Не удалось запустить веб-панель"
     fi
 
-    # AdGuard Home
-    if [[ "$SKIP_ADGUARD" != "1" ]] && systemctl is-enabled AdGuardHome.service > /dev/null 2>&1; then
-        systemctl restart AdGuardHome.service 2>/dev/null && ok "AdGuard Home запущен" || warn "Не удалось запустить AdGuard Home"
-    fi
+
 
     # Проверяем nfqws
     sleep 3
@@ -563,7 +531,6 @@ print_summary() {
     echo -e "   ${CYAN}┌──────────────────────────────────────────────────────┐${NC}"
     echo -e "   ${CYAN}│${NC}                                                      ${CYAN}│${NC}"
     echo -e "   ${CYAN}│${NC}  🎛️  Zapret веб-панель:  ${BOLD}http://${RPI_IP}:8080${NC}$(printf '%*s' $((13 - ${#RPI_IP})) '')${CYAN}│${NC}"
-    echo -e "   ${CYAN}│${NC}  🛡️  AdGuard Home:        ${BOLD}http://${RPI_IP}:3000${NC}$(printf '%*s' $((13 - ${#RPI_IP})) '')${CYAN}│${NC}"
     echo -e "   ${CYAN}│${NC}                                                      ${CYAN}│${NC}"
     echo -e "   ${CYAN}└──────────────────────────────────────────────────────┘${NC}"
     echo ""
@@ -612,8 +579,7 @@ main() {
     configure_zapret
     configure_sysctl
     install_gateway
-
-    install_adguard
+    
     install_web_panel
     install_services
     configure_static_ip

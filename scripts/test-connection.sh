@@ -2,9 +2,8 @@
 ###############################################################################
 # zapret-pi — Диагностический скрипт
 # Проверяет работоспособность всех компонентов системы:
-# - IP forwarding, nfqws, iptables, NAT, AdGuard, веб-панель
+# - IP forwarding, nfqws, iptables, NAT, веб-панель
 # - Подключение к заблокированным сайтам
-# - DNS-фильтрацию рекламы
 ###############################################################################
 
 set -uo pipefail
@@ -114,14 +113,7 @@ else
     test_fail "Сервис zapret-gateway НЕ активен"
 fi
 
-# Проверка AdGuard Home
-if systemctl is-active AdGuardHome.service > /dev/null 2>&1; then
-    test_ok "AdGuard Home запущен"
-elif pgrep -x AdGuardHome > /dev/null 2>&1; then
-    test_ok "AdGuard Home запущен (не через systemd)"
-else
-    test_fail "AdGuard Home НЕ запущен"
-fi
+
 
 # Проверка веб-панели
 if systemctl is-active zapret-web.service > /dev/null 2>&1; then
@@ -137,11 +129,7 @@ else
     test_warn "Порт 8080 (веб-панель) не слушает"
 fi
 
-if ss -tlnp 2>/dev/null | grep -q ':53'; then
-    test_ok "Порт 53 (DNS) слушает"
-else
-    test_warn "Порт 53 (DNS) не слушает"
-fi
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # 3. ПРАВИЛА IPTABLES
@@ -202,41 +190,7 @@ test_site "https://accounts.ea.com" "EA Accounts"
 # Дополнительные проверки базового интернета
 test_site "https://google.com" "Google (базовый тест)"
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# 5. DNS ТЕСТЫ
-# ═══════════════════════════════════════════════════════════════════════════════
-section "DNS тесты (блокировка рекламы)"
 
-# Проверка, что рекламные домены блокируются
-if command -v dig > /dev/null 2>&1; then
-    # Тест: ad.doubleclick.net должен резолвиться в 0.0.0.0 (если AdGuard настроен)
-    ad_result=$(dig +short ad.doubleclick.net @127.0.0.1 2>/dev/null | head -1) || true
-
-    if [[ "$ad_result" == "0.0.0.0" || "$ad_result" == "127.0.0.1" || "$ad_result" == "::" ]]; then
-        test_ok "ad.doubleclick.net заблокирован ($ad_result) — реклама блокируется"
-    elif [[ -z "$ad_result" ]]; then
-        test_warn "ad.doubleclick.net — нет ответа DNS (AdGuard может быть не настроен)"
-    else
-        test_warn "ad.doubleclick.net = $ad_result (реклама может НЕ блокироваться)"
-    fi
-
-    # Тест обычного домена — должен резолвиться нормально
-    normal_result=$(dig +short google.com @127.0.0.1 2>/dev/null | head -1) || true
-    if [[ -n "$normal_result" ]]; then
-        test_ok "google.com резолвится через локальный DNS ($normal_result)"
-    else
-        test_warn "google.com не резолвится через 127.0.0.1 (DNS может не работать)"
-    fi
-elif command -v nslookup > /dev/null 2>&1; then
-    ad_result=$(nslookup ad.doubleclick.net 127.0.0.1 2>/dev/null | grep -i "address" | tail -1 | awk '{print $2}') || true
-    if [[ "$ad_result" == "0.0.0.0" || "$ad_result" == "127.0.0.1" ]]; then
-        test_ok "ad.doubleclick.net заблокирован ($ad_result)"
-    else
-        test_warn "Не удалось проверить блокировку рекламы через nslookup"
-    fi
-else
-    test_warn "dig/nslookup не найдены, пропуск DNS-тестов"
-fi
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ИТОГ
@@ -263,7 +217,6 @@ echo -e ""
 echo -e "  ${BLUE}Для подробных логов:${NC}"
 echo -e "    sudo journalctl -u zapret -n 50"
 echo -e "    sudo journalctl -u zapret-gateway -n 50"
-echo -e "    sudo journalctl -u AdGuardHome -n 50"
 echo -e ""
 
 exit $FAIL
