@@ -399,8 +399,8 @@ install_web_panel() {
 copy_strategies() {
     step "Шаг 12: Копирование strategies.json..."
 
-    if [[ -f "$PROJECT_DIR/strategies.json" ]]; then
-        cp -v "$PROJECT_DIR/strategies.json" /opt/zapret-web/strategies.json
+    if [[ -f "$PROJECT_DIR/config/strategies.json" ]]; then
+        cp -v "$PROJECT_DIR/config/strategies.json" /opt/zapret-web/strategies.json
         ok "strategies.json скопирован"
     else
         warn "strategies.json не найден в проекте, пропуск"
