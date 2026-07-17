@@ -1,177 +1,185 @@
 #!/bin/bash
 ###############################################################################
-# zapret-pi — Автоматический установщик для Raspberry Pi
-# Один скрипт для полной настройки обхода блокировок + AdGuard Home + веб-панель
+#  ╔═══════════════════════════════════════════════════════════════╗
+#  ║           ZAPRET-PI — Автоматический установщик              ║
+#  ║     Обход блокировок + AdGuard Home + Веб-панель             ║
+#  ║           github.com/nmazarov/zapret-pi                      ║
+#  ╚═══════════════════════════════════════════════════════════════╝
 #
-# Поддерживаемые переменные окружения (для неинтерактивного режима):
-#   NON_INTERACTIVE=1  — не задавать вопросов
-#   RPI_IP=X.X.X.X     — статический IP для Raspberry Pi
-#   ROUTER_IP=X.X.X.X  — IP роутера (шлюз по умолчанию)
-#   IFACE_WAN=ethX      — сетевой интерфейс (WAN)
-#   DNS_SERVERS=X.X.X.X — DNS серверы (через запятую)
+#  Использование:
+#    sudo bash install.sh            — полная автоматическая установка
+#    sudo bash install.sh --help     — справка
+#
+#  Переменные окружения (опционально, для ручной настройки):
+#    RPI_IP=X.X.X.X       — статический IP для Raspberry Pi
+#    ROUTER_IP=X.X.X.X    — IP роутера
+#    IFACE_WAN=ethX       — сетевой интерфейс
 ###############################################################################
 
-set -euo pipefail
+set -uo pipefail
 
-# ─── Определяем директорию проекта ──────────────────────────────────────────
+# ─── Директория проекта ─────────────────────────────────────────────────────
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# ─── Цвета для вывода ───────────────────────────────────────────────────────
+# ─── Цвета ──────────────────────────────────────────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
 BOLD='\033[1m'
-NC='\033[0m' # Без цвета
+DIM='\033[2m'
+NC='\033[0m'
 
 # ─── Функции вывода ─────────────────────────────────────────────────────────
-info()  { echo -e "${BLUE}[INFO]${NC} $*"; }
-ok()    { echo -e "${GREEN}[  OK]${NC} $*"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
-error() { echo -e "${RED}[ERROR]${NC} $*"; }
-step()  { echo -e "\n${CYAN}${BOLD}>>> $*${NC}"; }
+info()    { echo -e "  ${BLUE}▸${NC} $*"; }
+ok()      { echo -e "  ${GREEN}✔${NC} $*"; }
+warn()    { echo -e "  ${YELLOW}⚠${NC} $*"; }
+fail()    { echo -e "  ${RED}✖${NC} $*"; }
+step()    { echo -e "\n${CYAN}${BOLD}━━━ $* ━━━${NC}"; }
+substep() { echo -e "  ${DIM}→${NC} $*"; }
 
-# ─── Баннер ──────────────────────────────────────────────────────────────────
+ERRORS=0
+
+# ─── Баннер ─────────────────────────────────────────────────────────────────
 banner() {
+    clear
+    echo ""
     echo -e "${CYAN}"
-    cat << 'EOF'
-  ══════════════════════════════════════════════════════════════
-  ╔═══╗           ╔═══╗  ╔═══╗
-  ╚══╗║  ╔══╗ ╔══╗║   ║  ║   ║ ╔══╗ ╔══╗ ╔══╗ ╔══╗ ╔══╗
-  ╔══╝║  ╠══╣ ║  ║╠═╦═╝  ╠═══╝ ╠═╗║ ║    ║    ╠═╗║ ║
-  ║   ║  ║  ║ ╠══╝║ ║    ║     ║ ║║ ╚══╝ ╚══╝ ║ ║║ ╚══╝
-  ╚═══╝  ╚══╝ ║   ╚═╝    ╚═╝   ╚══╝            ╚══╝
-               ╚═╝
-  ─── Автоматический установщик для Raspberry Pi ───
-  ─── Обход блокировок + AdGuard Home + Веб-панель ───
-  ══════════════════════════════════════════════════════════════
-EOF
+    echo '   ╔══════════════════════════════════════════════════════════╗'
+    echo '   ║                                                        ║'
+    echo '   ║   ███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗    ║'
+    echo '   ║   ╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝    ║'
+    echo '   ║     ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║       ║'
+    echo '   ║    ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║       ║'
+    echo '   ║   ███████╗██║  ██║██║     ██║  ██║███████╗   ██║       ║'
+    echo '   ║   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝       ║'
+    echo '   ║                     ╔═══╗ ╦                             ║'
+    echo '   ║                     ╠═══╝ ║                             ║'
+    echo '   ║                     ╩     ╩                             ║'
+    echo '   ║                                                        ║'
+    echo '   ║       🛡️  DPI Bypass + AdBlock для Raspberry Pi         ║'
+    echo '   ║       📺 PS5 · 🖥️ PC · 📱 Phone · 📺 Smart TV          ║'
+    echo '   ║                                                        ║'
+    echo '   ╚══════════════════════════════════════════════════════════╝'
     echo -e "${NC}"
+    echo -e "   ${DIM}github.com/nmazarov/zapret-pi${NC}"
+    echo ""
 }
 
-# ─── Проверка root ───────────────────────────────────────────────────────────
+# ─── Справка ────────────────────────────────────────────────────────────────
+show_help() {
+    banner
+    echo "  Использование: sudo bash install.sh [ОПЦИИ]"
+    echo ""
+    echo "  Опции:"
+    echo "    --help          Показать эту справку"
+    echo "    --skip-adguard  Не устанавливать AdGuard Home"
+    echo "    --skip-web      Не устанавливать веб-панель"
+    echo ""
+    echo "  Переменные окружения:"
+    echo "    RPI_IP=X.X.X.X       Статический IP для Raspberry Pi"
+    echo "    ROUTER_IP=X.X.X.X    IP роутера"
+    echo "    IFACE_WAN=ethX       Сетевой интерфейс"
+    echo ""
+    exit 0
+}
+
+# ─── Парсинг аргументов ─────────────────────────────────────────────────────
+SKIP_ADGUARD=0
+SKIP_WEB=0
+
+for arg in "$@"; do
+    case "$arg" in
+        --help|-h)      show_help ;;
+        --skip-adguard) SKIP_ADGUARD=1 ;;
+        --skip-web)     SKIP_WEB=1 ;;
+    esac
+done
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ПРОВЕРКИ
+# ═══════════════════════════════════════════════════════════════════════════════
+
 check_root() {
     if [[ $EUID -ne 0 ]]; then
-        error "Этот скрипт должен быть запущен от root!"
-        error "Используйте: sudo $0"
+        fail "Этот скрипт нужно запускать от root!"
+        echo -e "  Используй: ${CYAN}sudo bash install.sh${NC}"
         exit 1
     fi
     ok "Запущен от root"
 }
 
-# ─── Проверка ОС ────────────────────────────────────────────────────────────
 check_os() {
     if [[ ! -f /etc/os-release ]]; then
-        error "Не удалось определить ОС. Файл /etc/os-release не найден."
+        fail "Не удалось определить ОС"
         exit 1
     fi
-
     source /etc/os-release
-
-    if [[ "$ID" != "raspbian" && "$ID" != "debian" && "$ID" != "ubuntu" && "$ID_LIKE" != *"debian"* ]]; then
-        error "Этот скрипт предназначен для Raspberry Pi OS / Debian / Ubuntu."
-        error "Обнаружена ОС: $PRETTY_NAME"
+    if [[ "$ID" != "raspbian" && "$ID" != "debian" && "$ID" != "ubuntu" && "${ID_LIKE:-}" != *"debian"* ]]; then
+        fail "Нужна Raspberry Pi OS / Debian / Ubuntu. Обнаружено: $PRETTY_NAME"
         exit 1
     fi
-
     ok "ОС: $PRETTY_NAME"
 }
 
-# ─── Автоопределение сети ────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  АВТООПРЕДЕЛЕНИЕ СЕТИ
+# ═══════════════════════════════════════════════════════════════════════════════
+
 detect_network() {
-    step "Определение сетевых параметров..."
+    step "🔍 Определение сети"
 
-    # Загружаем скрипт автоопределения если есть
-    if [[ -f "$PROJECT_DIR/scripts/detect-network.sh" ]]; then
-        source <(bash "$PROJECT_DIR/scripts/detect-network.sh")
-    fi
-
-    # Шлюз по умолчанию
-    if [[ -z "${ROUTER_IP:-}" ]]; then
-        ROUTER_IP=$(ip route show default 2>/dev/null | awk '/default/ {print $3}' | head -1) || true
-        if [[ -z "$ROUTER_IP" ]]; then
-            ROUTER_IP="192.168.1.1"
-            warn "Не удалось определить шлюз. Используется значение по умолчанию: $ROUTER_IP"
-        fi
-    fi
-
-    # WAN-интерфейс
+    # Интерфейс WAN — берём тот, через который идёт default route
     if [[ -z "${IFACE_WAN:-}" ]]; then
         IFACE_WAN=$(ip route show default 2>/dev/null | awk '/default/ {print $5}' | head -1) || true
         if [[ -z "$IFACE_WAN" ]]; then
-            IFACE_WAN="eth0"
-            warn "Не удалось определить интерфейс. Используется значение по умолчанию: $IFACE_WAN"
+            # Пробуем найти первый ethernet-интерфейс с IP
+            IFACE_WAN=$(ip -o link show | awk -F': ' '/^[0-9]+: (eth|en)/{print $2}' | head -1) || true
+            IFACE_WAN="${IFACE_WAN:-eth0}"
         fi
     fi
 
-    # IP адрес RPi
+    # IP роутера — шлюз по умолчанию
+    if [[ -z "${ROUTER_IP:-}" ]]; then
+        ROUTER_IP=$(ip route show default 2>/dev/null | awk '/default/ {print $3}' | head -1) || true
+        ROUTER_IP="${ROUTER_IP:-192.168.1.1}"
+    fi
+
+    # IP Raspberry Pi — текущий IP на WAN-интерфейсе
     if [[ -z "${RPI_IP:-}" ]]; then
-        # Предлагаем .10 в подсети роутера
-        local subnet
-        subnet=$(echo "$ROUTER_IP" | sed 's/\.[0-9]*$/.10/')
-        RPI_IP="$subnet"
+        RPI_IP=$(ip -4 addr show "$IFACE_WAN" 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -1) || true
+        RPI_IP="${RPI_IP:-192.168.1.10}"
     fi
 
-    # DNS серверы
-    if [[ -z "${DNS_SERVERS:-}" ]]; then
-        DNS_SERVERS="127.0.0.1"
-    fi
+    # Подсеть
+    SUBNET=$(echo "$RPI_IP" | sed 's/\.[0-9]*$//')
 
-    # Номер очереди NFQUEUE
+    # NFQUEUE номер
     QUEUE_NUM="${QUEUE_NUM:-200}"
 
-    info "Обнаружены/заданы параметры сети:"
-    info "  Шлюз (роутер):    $ROUTER_IP"
-    info "  Интерфейс WAN:    $IFACE_WAN"
-    info "  IP Raspberry Pi:  $RPI_IP"
-    info "  DNS серверы:       $DNS_SERVERS"
-    info "  NFQUEUE номер:     $QUEUE_NUM"
-}
-
-# ─── Подтверждение пользователем ─────────────────────────────────────────────
-confirm_settings() {
-    if [[ "${NON_INTERACTIVE:-0}" == "1" ]]; then
-        info "Неинтерактивный режим — используем текущие настройки."
-        return
-    fi
-
     echo ""
-    echo -e "${YELLOW}Всё верно? Продолжить установку? [Y/n/c]${NC}"
-    echo -e "  Y — продолжить, n — отменить, c — изменить настройки"
-    read -r answer
-    case "$answer" in
-        [nN])
-            info "Установка отменена."
-            exit 0
-            ;;
-        [cC])
-            read -rp "  IP Raspberry Pi [$RPI_IP]: " new_rpi
-            [[ -n "$new_rpi" ]] && RPI_IP="$new_rpi"
-
-            read -rp "  IP роутера (шлюз) [$ROUTER_IP]: " new_gw
-            [[ -n "$new_gw" ]] && ROUTER_IP="$new_gw"
-
-            read -rp "  Интерфейс WAN [$IFACE_WAN]: " new_iface
-            [[ -n "$new_iface" ]] && IFACE_WAN="$new_iface"
-
-            read -rp "  DNS серверы [$DNS_SERVERS]: " new_dns
-            [[ -n "$new_dns" ]] && DNS_SERVERS="$new_dns"
-
-            info "Обновлённые параметры:"
-            info "  Шлюз: $ROUTER_IP | Интерфейс: $IFACE_WAN | IP RPi: $RPI_IP | DNS: $DNS_SERVERS"
-            ;;
-        *)
-            ;;
-    esac
+    echo -e "  ${BOLD}┌─────────────────────────────────────────┐${NC}"
+    echo -e "  ${BOLD}│${NC}  Интерфейс:      ${CYAN}${IFACE_WAN}${NC}$(printf '%*s' $((23 - ${#IFACE_WAN})) '')${BOLD}│${NC}"
+    echo -e "  ${BOLD}│${NC}  IP Raspberry Pi: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((23 - ${#RPI_IP})) '')${BOLD}│${NC}"
+    echo -e "  ${BOLD}│${NC}  IP Роутера:      ${CYAN}${ROUTER_IP}${NC}$(printf '%*s' $((23 - ${#ROUTER_IP})) '')${BOLD}│${NC}"
+    echo -e "  ${BOLD}│${NC}  Подсеть:         ${CYAN}${SUBNET}.0/24${NC}$(printf '%*s' $((19 - ${#SUBNET})) '')${BOLD}│${NC}"
+    echo -e "  ${BOLD}└─────────────────────────────────────────┘${NC}"
+    echo ""
 }
 
-# ─── Шаг 1: Обновление системы и установка зависимостей ─────────────────────
-install_deps() {
-    step "Шаг 1: Обновление системы и установка зависимостей..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 1: ЗАВИСИМОСТИ
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    apt-get update -y
-    apt-get upgrade -y
+install_deps() {
+    step "📦 Шаг 1/10 — Установка зависимостей"
+
+    export DEBIAN_FRONTEND=noninteractive
+
+    substep "Обновление списка пакетов..."
+    apt-get update -qq -y > /dev/null 2>&1
 
     local deps=(
         git make gcc libc-dev
@@ -182,403 +190,435 @@ install_deps() {
         jq ethtool procps tcpdump
     )
 
-    apt-get install -y "${deps[@]}"
-    ok "Зависимости установлены"
+    substep "Установка ${#deps[@]} пакетов..."
+    apt-get install -qq -y "${deps[@]}" > /dev/null 2>&1
+
+    ok "Все зависимости установлены"
 }
 
-# ─── Шаг 2: Клонирование zapret ─────────────────────────────────────────────
-clone_zapret() {
-    step "Шаг 2: Клонирование zapret..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 2: ZAPRET
+# ═══════════════════════════════════════════════════════════════════════════════
 
+install_zapret() {
+    step "⚡ Шаг 2/10 — Установка Zapret"
+
+    # Клонирование
     if [[ -d /opt/zapret/.git ]]; then
-        warn "zapret уже клонирован в /opt/zapret, обновляем..."
-        cd /opt/zapret
-        git pull || warn "Не удалось обновить (возможно, нет интернета)"
+        substep "Zapret уже есть, обновляем..."
+        cd /opt/zapret && git pull --quiet 2>/dev/null || true
     else
+        substep "Клонирование zapret..."
         rm -rf /opt/zapret
-        git clone --depth=1 https://github.com/bol-van/zapret.git /opt/zapret
+        git clone --quiet --depth=1 https://github.com/bol-van/zapret.git /opt/zapret
     fi
+    ok "Zapret загружен"
 
-    ok "zapret готов в /opt/zapret"
-}
-
-# ─── Шаг 3: Сборка zapret ───────────────────────────────────────────────────
-build_zapret() {
-    step "Шаг 3: Сборка zapret..."
-
+    # Сборка
+    substep "Сборка nfqws, tpws, ip2net..."
     cd /opt/zapret
-    make clean || true
-    make
+    make clean > /dev/null 2>&1 || true
+    make > /dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        fail "Ошибка сборки! Попробуй: cd /opt/zapret && make"
+        ((ERRORS++))
+        return
+    fi
+    ok "Zapret собран"
 
-    ok "zapret собран"
-}
-
-# ─── Шаг 4: Установка бинарников zapret ─────────────────────────────────────
-install_zapret_bins() {
-    step "Шаг 4: Установка бинарников zapret..."
-
+    # Установка бинарников
     if [[ -f /opt/zapret/install_bin.sh ]]; then
-        cd /opt/zapret
-        bash install_bin.sh
+        substep "Установка бинарников..."
+        cd /opt/zapret && bash install_bin.sh > /dev/null 2>&1
         ok "Бинарники установлены"
-    else
-        warn "install_bin.sh не найден, пропуск"
     fi
 }
 
-# ─── Шаг 5: Копирование конфигурации ────────────────────────────────────────
-copy_config() {
-    step "Шаг 5: Копирование конфигурации zapret..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 3: КОНФИГУРАЦИЯ ZAPRET
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    # Создаём директорию для ipset
+configure_zapret() {
+    step "⚙️  Шаг 3/10 — Конфигурация Zapret"
+
     mkdir -p /opt/zapret/ipset
 
     # ВАЖНО: /opt/zapret/config должен быть ФАЙЛОМ, не папкой!
-    # zapret читает его как shell-конфиг
     if [[ -d /opt/zapret/config ]]; then
-        warn "/opt/zapret/config — это папка, удаляем..."
         rm -rf /opt/zapret/config
     fi
 
     if [[ -f "$PROJECT_DIR/config/default.conf" ]]; then
-        cp -v "$PROJECT_DIR/config/default.conf" /opt/zapret/config
-        ok "Конфигурация скопирована в /opt/zapret/config"
+        cp "$PROJECT_DIR/config/default.conf" /opt/zapret/config
+        ok "Конфиг zapret установлен"
     else
-        warn "config/default.conf не найден в проекте, пропуск"
+        warn "default.conf не найден, создаю базовый..."
+        cat > /opt/zapret/config << 'CONF'
+MODE=nfqws
+MODE_FILTER=none
+IFACE_WAN=eth0
+TPWS_ENABLE=0
+NFQWS_ENABLE=1
+NFQWS_PORTS_TCP="80,443"
+NFQWS_PORTS_UDP="443"
+NFQWS_QUEUE_NUM=200
+NFQWS_OPT="
+--filter-tcp=80,443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=md5sig \
+--dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=2 \
+--dpi-desync-fake-tls-mod=rnd,rndsni,dupsid \
+--dpi-desync-any-protocol \
+--new \
+--filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6
+"
+CONF
+        ok "Базовый конфиг создан"
     fi
-}
 
-# ─── Шаг 6: Копирование списка блокировок ───────────────────────────────────
-copy_hosts() {
-    step "Шаг 6: Копирование списка заблокированных хостов..."
-
+    # Список заблокированных хостов
     if [[ -f "$PROJECT_DIR/config/hosts-blocked.txt" ]]; then
-        cp -v "$PROJECT_DIR/config/hosts-blocked.txt" /opt/zapret/ipset/zapret-hosts-user.txt
-        ok "Список хостов скопирован"
-    else
-        warn "config/hosts-blocked.txt не найден, пропуск"
+        cp "$PROJECT_DIR/config/hosts-blocked.txt" /opt/zapret/ipset/zapret-hosts-user.txt
+        local count
+        count=$(grep -c '^[^#]' /opt/zapret/ipset/zapret-hosts-user.txt 2>/dev/null || echo "0")
+        ok "Список хостов скопирован ($count доменов)"
     fi
+
+    # Настройка zapret как системный сервис
+    substep "Настройка сервиса zapret..."
+    if [[ -f /opt/zapret/install_easy.sh ]]; then
+        cd /opt/zapret
+        echo -e "Y\n" | bash install_easy.sh > /dev/null 2>&1 || true
+    fi
+    ok "Сервис zapret настроен"
 }
 
-# ─── Шаг 7: Настройка статического IP ───────────────────────────────────────
-configure_static_ip() {
-    step "Шаг 7: Настройка статического IP ($RPI_IP)..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 4: SYSCTL (IP FORWARDING)
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    local dhcpcd_conf="/etc/dhcpcd.conf"
-    local marker="# === zapret-pi static config ==="
-
-    if [[ ! -f "$dhcpcd_conf" ]]; then
-        warn "/etc/dhcpcd.conf не найден (возможно, используется NetworkManager). Пропуск."
-        return
-    fi
-
-    # Бэкап
-    if [[ ! -f "${dhcpcd_conf}.zapret-backup" ]]; then
-        cp "$dhcpcd_conf" "${dhcpcd_conf}.zapret-backup"
-        ok "Бэкап dhcpcd.conf создан"
-    fi
-
-    # Удаляем старый блок если есть
-    if grep -q "$marker" "$dhcpcd_conf"; then
-        sed -i "/$marker/,/^$/d" "$dhcpcd_conf"
-    fi
-
-    # Определяем маску подсети (по умолчанию /24)
-    local cidr="24"
-
-    # Добавляем конфигурацию
-    cat >> "$dhcpcd_conf" << EOF
-
-$marker
-interface $IFACE_WAN
-static ip_address=${RPI_IP}/${cidr}
-static routers=${ROUTER_IP}
-static domain_name_servers=${DNS_SERVERS}
-
-EOF
-
-    ok "Статический IP настроен: $RPI_IP"
-}
-
-# ─── Шаг 8: Настройка sysctl ────────────────────────────────────────────────
 configure_sysctl() {
-    step "Шаг 8: Настройка sysctl (IP forwarding, conntrack)..."
+    step "🔧 Шаг 4/10 — Настройка маршрутизации"
 
     cat > /etc/sysctl.d/99-zapret-pi.conf << 'EOF'
-# zapret-pi: включаем маршрутизацию и настройки conntrack
+# zapret-pi: маршрутизация и conntrack
 net.ipv4.ip_forward=1
 net.netfilter.nf_conntrack_checksum=0
 net.netfilter.nf_conntrack_tcp_be_liberal=1
 EOF
 
     sysctl --system > /dev/null 2>&1
-    ok "sysctl настроен"
+    ok "IP forwarding включён"
 }
 
-# ─── Шаг 9: Установка gateway-setup.sh ──────────────────────────────────────
-install_gateway_script() {
-    step "Шаг 9: Установка скрипта шлюза..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 5: GATEWAY (NAT + NFQUEUE)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+install_gateway() {
+    step "🌐 Шаг 5/10 — Настройка шлюза (NAT)"
 
     mkdir -p /opt/zapret-pi
 
-    # Создаём конфигурационный файл с параметрами сети
+    # Сохраняем конфиг сети
     cat > /opt/zapret-pi/zapret-pi.conf << EOF
-# Конфигурация zapret-pi
-# Автоматически создано установщиком $(date '+%Y-%m-%d %H:%M:%S')
+# Конфигурация zapret-pi (создано $(date '+%Y-%m-%d %H:%M'))
 IFACE_WAN="${IFACE_WAN}"
 ROUTER_IP="${ROUTER_IP}"
 RPI_IP="${RPI_IP}"
-DNS_SERVERS="${DNS_SERVERS}"
+DNS_SERVERS="127.0.0.1"
 QUEUE_NUM="${QUEUE_NUM}"
 EOF
+    ok "Конфиг сети сохранён"
 
+    # Копируем gateway-setup.sh
     if [[ -f "$PROJECT_DIR/scripts/gateway-setup.sh" ]]; then
-        cp -v "$PROJECT_DIR/scripts/gateway-setup.sh" /opt/zapret-pi/gateway-setup.sh
+        cp "$PROJECT_DIR/scripts/gateway-setup.sh" /opt/zapret-pi/gateway-setup.sh
         chmod +x /opt/zapret-pi/gateway-setup.sh
-
-        # Подставляем переменные по умолчанию (скрипт сам читает .conf, но на всякий)
-        sed -i "s|__IFACE_WAN__|${IFACE_WAN}|g" /opt/zapret-pi/gateway-setup.sh 2>/dev/null || true
-        sed -i "s|__ROUTER_IP__|${ROUTER_IP}|g" /opt/zapret-pi/gateway-setup.sh 2>/dev/null || true
-        sed -i "s|__RPI_IP__|${RPI_IP}|g" /opt/zapret-pi/gateway-setup.sh 2>/dev/null || true
-        sed -i "s|__QUEUE_NUM__|${QUEUE_NUM}|g" /opt/zapret-pi/gateway-setup.sh 2>/dev/null || true
-
         ok "Скрипт шлюза установлен"
-    else
-        warn "scripts/gateway-setup.sh не найден в проекте"
     fi
+
+    # Копируем вспомогательные скрипты
+    for script in test-connection.sh detect-network.sh; do
+        if [[ -f "$PROJECT_DIR/scripts/$script" ]]; then
+            cp "$PROJECT_DIR/scripts/$script" /opt/zapret-pi/"$script"
+            chmod +x /opt/zapret-pi/"$script"
+        fi
+    done
 }
 
-# ─── Шаг 10: Установка AdGuard Home ─────────────────────────────────────────
-install_adguard() {
-    step "Шаг 10: Установка AdGuard Home..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 6: ADGUARD HOME
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    if [[ -d /opt/AdGuardHome ]] && [[ -f /opt/AdGuardHome/AdGuardHome ]]; then
-        ok "AdGuard Home уже установлен, пропуск"
+install_adguard() {
+    if [[ "$SKIP_ADGUARD" == "1" ]]; then
+        step "🚫 Шаг 6/10 — AdGuard Home (пропущен)"
         return
     fi
 
-    info "Скачивание и установка AdGuard Home..."
-    curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
+    step "🛡️  Шаг 6/10 — AdGuard Home (блокировка рекламы)"
+
+    if [[ -f /opt/AdGuardHome/AdGuardHome ]]; then
+        ok "AdGuard Home уже установлен"
+        return
+    fi
+
+    substep "Скачивание и установка AdGuard Home..."
+    curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v > /dev/null 2>&1
 
     if [[ -f /opt/AdGuardHome/AdGuardHome ]]; then
         ok "AdGuard Home установлен"
     else
-        warn "Не удалось подтвердить установку AdGuard Home"
+        warn "Не удалось установить AdGuard Home (можно установить позже)"
+        ((ERRORS++))
     fi
 }
 
-# ─── Шаг 11: Установка веб-панели ───────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 7: ВЕБ-ПАНЕЛЬ
+# ═══════════════════════════════════════════════════════════════════════════════
+
 install_web_panel() {
-    step "Шаг 11: Установка веб-панели управления..."
+    if [[ "$SKIP_WEB" == "1" ]]; then
+        step "🚫 Шаг 7/10 — Веб-панель (пропущен)"
+        return
+    fi
+
+    step "🖥️  Шаг 7/10 — Веб-панель управления"
 
     mkdir -p /opt/zapret-web/static
 
-    # Копируем файлы веб-панели
+    # Копируем файлы
     if [[ -f "$PROJECT_DIR/web/app.py" ]]; then
-        cp -v "$PROJECT_DIR/web/app.py" /opt/zapret-web/app.py
-        ok "app.py скопирован"
-    else
-        warn "web/app.py не найден"
+        cp "$PROJECT_DIR/web/app.py" /opt/zapret-web/app.py
+        ok "Backend API скопирован"
     fi
 
     if [[ -f "$PROJECT_DIR/web/static/index.html" ]]; then
-        cp -v "$PROJECT_DIR/web/static/index.html" /opt/zapret-web/static/index.html
-        ok "index.html скопирован"
-    else
-        warn "web/static/index.html не найден"
+        cp "$PROJECT_DIR/web/static/index.html" /opt/zapret-web/static/index.html
+        ok "Frontend скопирован"
     fi
 
-    # Создаём Python venv
+    # Стратегии
+    if [[ -f "$PROJECT_DIR/config/strategies.json" ]]; then
+        cp "$PROJECT_DIR/config/strategies.json" /opt/zapret-web/strategies.json
+        ok "Стратегии скопированы"
+    fi
+
+    # Python venv + Flask
+    substep "Настройка Python окружения..."
     if [[ ! -d /opt/zapret-web/venv ]]; then
-        info "Создание Python virtual environment..."
         python3 -m venv /opt/zapret-web/venv
     fi
-
-    # Устанавливаем Flask
-    /opt/zapret-web/venv/bin/pip install --upgrade pip
-    /opt/zapret-web/venv/bin/pip install flask
+    /opt/zapret-web/venv/bin/pip install --quiet --upgrade pip > /dev/null 2>&1
+    /opt/zapret-web/venv/bin/pip install --quiet flask > /dev/null 2>&1
 
     ok "Веб-панель установлена"
 }
 
-# ─── Шаг 12: Копирование strategies.json ────────────────────────────────────
-copy_strategies() {
-    step "Шаг 12: Копирование strategies.json..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 8: SYSTEMD СЕРВИСЫ
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    if [[ -f "$PROJECT_DIR/config/strategies.json" ]]; then
-        cp -v "$PROJECT_DIR/config/strategies.json" /opt/zapret-web/strategies.json
-        ok "strategies.json скопирован"
-    else
-        warn "strategies.json не найден в проекте, пропуск"
-    fi
+install_services() {
+    step "🔄 Шаг 8/10 — Systemd сервисы"
+
+    local installed=0
+
+    for svc_file in "$PROJECT_DIR"/systemd/*.service; do
+        if [[ -f "$svc_file" ]]; then
+            local name
+            name=$(basename "$svc_file")
+            cp "$svc_file" /etc/systemd/system/"$name"
+            ((installed++))
+        fi
+    done
+
+    systemctl daemon-reload
+
+    # Включаем сервисы
+    for svc_file in "$PROJECT_DIR"/systemd/*.service; do
+        if [[ -f "$svc_file" ]]; then
+            local name
+            name=$(basename "$svc_file" .service)
+            systemctl enable "${name}.service" > /dev/null 2>&1 || true
+            substep "Включён: ${name}"
+        fi
+    done
+
+    ok "Установлено сервисов: $installed"
 }
 
-# ─── Шаг 13: Установка systemd сервисов ─────────────────────────────────────
-install_services() {
-    step "Шаг 13: Установка systemd сервисов..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 9: СТАТИЧЕСКИЙ IP
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    local service_dir="$PROJECT_DIR/systemd"
+configure_static_ip() {
+    step "📡 Шаг 9/10 — Статический IP"
 
-    if [[ ! -d "$service_dir" ]]; then
-        warn "Директория systemd/ не найдена, пропуск"
+    local dhcpcd="/etc/dhcpcd.conf"
+    local marker="# === zapret-pi ==="
+
+    # Проверяем, используется ли dhcpcd
+    if [[ ! -f "$dhcpcd" ]]; then
+        warn "dhcpcd.conf не найден (используется NetworkManager?)"
+        info "Текущий IP ($RPI_IP) будет использован"
         return
     fi
 
-    local count=0
-    for svc_file in "$service_dir"/*.service; do
-        if [[ -f "$svc_file" ]]; then
-            local svc_name
-            svc_name=$(basename "$svc_file")
-            cp -v "$svc_file" /etc/systemd/system/"$svc_name"
-            ((count++))
-        fi
-    done
+    # Проверяем, уже настроен ли статический IP
+    local current_ip
+    current_ip=$(ip -4 addr show "$IFACE_WAN" 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -1)
 
-    if [[ $count -gt 0 ]]; then
-        systemctl daemon-reload
-
-        # Включаем все наши сервисы
-        for svc_file in "$service_dir"/*.service; do
-            if [[ -f "$svc_file" ]]; then
-                local svc_name
-                svc_name=$(basename "$svc_file")
-                systemctl enable "$svc_name" || warn "Не удалось включить $svc_name"
-            fi
-        done
-
-        ok "Установлено сервисов: $count"
-    else
-        warn "Файлы .service не найдены"
-    fi
-}
-
-# ─── Шаг 14: Настройка zapret сервиса ───────────────────────────────────────
-setup_zapret_service() {
-    step "Шаг 14: Настройка сервиса zapret..."
-
-    if [[ -f /opt/zapret/install_easy.sh ]]; then
-        info "Запуск install_easy.sh в неинтерактивном режиме..."
-        cd /opt/zapret
-        # Пробуем запустить в неинтерактивном режиме
-        echo -e "Y\n" | bash install_easy.sh 2>/dev/null || {
-            warn "install_easy.sh завершился с ошибкой, настраиваем вручную"
-            # Ручная настройка сервиса zapret если install_easy не сработал
-            if [[ -f /opt/zapret/init.d/sysv/zapret ]]; then
-                cp /opt/zapret/init.d/sysv/zapret /etc/init.d/zapret 2>/dev/null || true
-                chmod +x /etc/init.d/zapret 2>/dev/null || true
-            fi
-        }
-    else
-        warn "install_easy.sh не найден"
+    # Бэкап
+    if [[ ! -f "${dhcpcd}.zapret-backup" ]]; then
+        cp "$dhcpcd" "${dhcpcd}.zapret-backup"
     fi
 
-    ok "Сервис zapret настроен"
+    # Удаляем старый блок
+    if grep -q "$marker" "$dhcpcd" 2>/dev/null; then
+        sed -i "/${marker}/,/^$/d" "$dhcpcd"
+    fi
+
+    # Добавляем конфигурацию
+    cat >> "$dhcpcd" << EOF
+
+${marker}
+interface ${IFACE_WAN}
+static ip_address=${RPI_IP}/24
+static routers=${ROUTER_IP}
+static domain_name_servers=127.0.0.1 8.8.8.8
+
+EOF
+
+    ok "Статический IP: $RPI_IP (применится после перезагрузки)"
 }
 
-# ─── Шаг 15: Запуск всех сервисов ───────────────────────────────────────────
-start_services() {
-    step "Шаг 15: Запуск сервисов..."
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 10: ЗАПУСК ВСЕГО
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    local services=("zapret-gateway" "zapret-web")
+start_everything() {
+    step "🚀 Шаг 10/10 — Запуск сервисов"
 
-    # zapret (может быть через init.d или systemd)
-    if systemctl is-enabled zapret.service 2>/dev/null; then
-        systemctl restart zapret.service && ok "zapret запущен" || warn "Не удалось запустить zapret"
+    # Zapret (nfqws)
+    if systemctl is-enabled zapret.service > /dev/null 2>&1; then
+        systemctl restart zapret.service 2>/dev/null && ok "Zapret (nfqws) запущен" || warn "Не удалось запустить zapret"
     elif [[ -f /etc/init.d/zapret ]]; then
-        /etc/init.d/zapret restart && ok "zapret запущен (init.d)" || warn "Не удалось запустить zapret"
+        /etc/init.d/zapret restart > /dev/null 2>&1 && ok "Zapret (init.d) запущен" || warn "Не удалось запустить zapret"
     fi
 
-    for svc in "${services[@]}"; do
-        if systemctl is-enabled "${svc}.service" 2>/dev/null; then
-            systemctl restart "${svc}.service" && ok "$svc запущен" || warn "Не удалось запустить $svc"
-        fi
-    done
+    # Gateway
+    systemctl restart zapret-gateway.service 2>/dev/null && ok "Gateway (NAT/NFQUEUE) запущен" || warn "Не удалось запустить gateway"
+
+    # Веб-панель
+    if [[ "$SKIP_WEB" != "1" ]]; then
+        systemctl restart zapret-web.service 2>/dev/null && ok "Веб-панель запущена" || warn "Не удалось запустить веб-панель"
+    fi
 
     # AdGuard Home
-    if systemctl is-enabled AdGuardHome.service 2>/dev/null; then
-        systemctl restart AdGuardHome.service && ok "AdGuard Home запущен" || warn "Не удалось запустить AdGuard Home"
+    if [[ "$SKIP_ADGUARD" != "1" ]] && systemctl is-enabled AdGuardHome.service > /dev/null 2>&1; then
+        systemctl restart AdGuardHome.service 2>/dev/null && ok "AdGuard Home запущен" || warn "Не удалось запустить AdGuard Home"
+    fi
+
+    # Проверяем nfqws
+    sleep 1
+    if pgrep -x nfqws > /dev/null 2>&1; then
+        ok "nfqws процесс активен ✓"
+    else
+        warn "nfqws не обнаружен! Проверь: sudo systemctl status zapret"
+        ((ERRORS++))
     fi
 }
 
-# ─── Шаг 16: Итоговая сводка ────────────────────────────────────────────────
-print_summary() {
-    step "Установка завершена!"
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ФИНАЛЬНАЯ СВОДКА
+# ═══════════════════════════════════════════════════════════════════════════════
 
+print_summary() {
     local subnet
     subnet=$(echo "$RPI_IP" | sed 's/\.[0-9]*$//')
 
-    echo -e ""
-    echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN}${BOLD}  УСТАНОВКА ZAPRET-PI ЗАВЕРШЕНА УСПЕШНО!${NC}"
-    echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════${NC}"
-    echo -e ""
-    echo -e "${BOLD}Сетевые параметры:${NC}"
-    echo -e "  IP Raspberry Pi:     ${CYAN}${RPI_IP}${NC}"
-    echo -e "  IP роутера:          ${CYAN}${ROUTER_IP}${NC}"
-    echo -e "  Интерфейс:           ${CYAN}${IFACE_WAN}${NC}"
-    echo -e ""
-    echo -e "${BOLD}Панели управления:${NC}"
-    echo -e "  Веб-панель zapret:   ${CYAN}http://${RPI_IP}:8080${NC}"
-    echo -e "  AdGuard Home:        ${CYAN}http://${RPI_IP}:3000${NC} (первоначальная настройка)"
-    echo -e "  AdGuard Home:        ${CYAN}http://${RPI_IP}:80${NC}   (после настройки)"
-    echo -e ""
-    echo -e "${BOLD}═══ Настройка устройств ═══${NC}"
-    echo -e ""
-    echo -e "${YELLOW}📺 PS5 / PS4:${NC}"
-    echo -e "  Настройки → Сеть → Настроить интернет-соединение"
-    echo -e "  Шлюз по умолчанию:  ${CYAN}${RPI_IP}${NC}"
-    echo -e "  DNS основной:        ${CYAN}${RPI_IP}${NC}"
-    echo -e "  DNS дополнительный:  ${CYAN}8.8.8.8${NC}"
-    echo -e ""
-    echo -e "${YELLOW}🖥️  ПК (Windows):${NC}"
-    echo -e "  Панель управления → Сеть → Свойства адаптера → IPv4"
-    echo -e "  Шлюз:               ${CYAN}${RPI_IP}${NC}"
-    echo -e "  DNS:                 ${CYAN}${RPI_IP}${NC}"
-    echo -e ""
-    echo -e "${YELLOW}📱 Телефон (Android/iOS):${NC}"
-    echo -e "  Настройки Wi-Fi → Дополнительно → Статический IP"
-    echo -e "  Шлюз:               ${CYAN}${RPI_IP}${NC}"
-    echo -e "  DNS:                 ${CYAN}${RPI_IP}${NC}"
-    echo -e ""
-    echo -e "${YELLOW}📺 Smart TV:${NC}"
-    echo -e "  Настройки сети → Ручная настройка IP"
-    echo -e "  Шлюз:               ${CYAN}${RPI_IP}${NC}"
-    echo -e "  DNS:                 ${CYAN}${RPI_IP}${NC}"
-    echo -e ""
-    echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${BOLD}Полезные команды:${NC}"
-    echo -e "  Проверка:            ${CYAN}sudo bash $PROJECT_DIR/scripts/test-connection.sh${NC}"
-    echo -e "  Перезапуск:          ${CYAN}sudo systemctl restart zapret zapret-gateway${NC}"
-    echo -e "  Логи:                ${CYAN}sudo journalctl -u zapret-gateway -f${NC}"
-    echo -e "  Статус:              ${CYAN}sudo systemctl status zapret zapret-gateway zapret-web${NC}"
-    echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    echo ""
+    if [[ $ERRORS -eq 0 ]]; then
+        echo -e "${GREEN}"
+        echo '   ╔══════════════════════════════════════════════════════════╗'
+        echo '   ║                                                        ║'
+        echo '   ║        ✅  УСТАНОВКА ЗАВЕРШЕНА УСПЕШНО!                ║'
+        echo '   ║                                                        ║'
+        echo '   ╚══════════════════════════════════════════════════════════╝'
+        echo -e "${NC}"
+    else
+        echo -e "${YELLOW}"
+        echo '   ╔══════════════════════════════════════════════════════════╗'
+        echo '   ║                                                        ║'
+        echo -e "   ║    ⚠️  Установка завершена с ${ERRORS} предупреждением(ями)    ║"
+        echo '   ║                                                        ║'
+        echo '   ╚══════════════════════════════════════════════════════════╝'
+        echo -e "${NC}"
+    fi
+
+    echo -e "   ${BOLD}🌐 Панели управления:${NC}"
+    echo ""
+    echo -e "   ${CYAN}┌──────────────────────────────────────────────────────┐${NC}"
+    echo -e "   ${CYAN}│${NC}                                                      ${CYAN}│${NC}"
+    echo -e "   ${CYAN}│${NC}  🎛️  Zapret веб-панель:  ${BOLD}http://${RPI_IP}:8080${NC}$(printf '%*s' $((13 - ${#RPI_IP})) '')${CYAN}│${NC}"
+    echo -e "   ${CYAN}│${NC}  🛡️  AdGuard Home:        ${BOLD}http://${RPI_IP}:3000${NC}$(printf '%*s' $((13 - ${#RPI_IP})) '')${CYAN}│${NC}"
+    echo -e "   ${CYAN}│${NC}                                                      ${CYAN}│${NC}"
+    echo -e "   ${CYAN}└──────────────────────────────────────────────────────┘${NC}"
+    echo ""
+
+    echo -e "   ${BOLD}📺 Настройка устройств${NC} (укажи шлюз и DNS → ${CYAN}${RPI_IP}${NC}):"
+    echo ""
+    echo -e "   ┌──────────┬─────────────────────────────────────────────┐"
+    echo -e "   │ ${BOLD}PS5/PS4${NC}  │ Настройки → Сеть → Шлюз: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((14 - ${#RPI_IP})) '')│"
+    echo -e "   │          │ DNS: ${CYAN}${RPI_IP}${NC} / ${DIM}8.8.8.8${NC}$(printf '%*s' $((23 - ${#RPI_IP})) '')│"
+    echo -e "   ├──────────┼─────────────────────────────────────────────┤"
+    echo -e "   │ ${BOLD}ПК${NC}       │ Сетевые настройки → IPv4 → Шлюз: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((8 - ${#RPI_IP})) '')│"
+    echo -e "   │          │ DNS: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((34 - ${#RPI_IP})) '')│"
+    echo -e "   ├──────────┼─────────────────────────────────────────────┤"
+    echo -e "   │ ${BOLD}Smart TV${NC} │ Настройки сети → Шлюз: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((17 - ${#RPI_IP})) '')│"
+    echo -e "   │          │ DNS: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((34 - ${#RPI_IP})) '')│"
+    echo -e "   ├──────────┼─────────────────────────────────────────────┤"
+    echo -e "   │ ${BOLD}Телефон${NC}  │ Wi-Fi → Статический IP → Шлюз: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((9 - ${#RPI_IP})) '')│"
+    echo -e "   │          │ DNS: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((34 - ${#RPI_IP})) '')│"
+    echo -e "   └──────────┴─────────────────────────────────────────────┘"
+    echo ""
+
+    echo -e "   ${BOLD}🔧 Полезные команды:${NC}"
+    echo -e "   ${DIM}Статус:${NC}       sudo systemctl status zapret zapret-gateway zapret-web"
+    echo -e "   ${DIM}Перезапуск:${NC}   sudo systemctl restart zapret zapret-gateway"
+    echo -e "   ${DIM}Логи:${NC}         sudo journalctl -u zapret -f"
+    echo -e "   ${DIM}Диагностика:${NC}  sudo bash /opt/zapret-pi/test-connection.sh"
+    echo -e "   ${DIM}Удаление:${NC}     sudo bash $(pwd)/uninstall.sh"
+    echo ""
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ГЛАВНАЯ ФУНКЦИЯ
+#  ГЛАВНАЯ ФУНКЦИЯ
 # ═══════════════════════════════════════════════════════════════════════════════
+
 main() {
     banner
+
+    step "🔐 Проверки"
     check_root
     check_os
+
     detect_network
-    confirm_settings
 
     install_deps
-    clone_zapret
-    build_zapret
-    install_zapret_bins
-    copy_config
-    copy_hosts
-    configure_static_ip
+    install_zapret
+    configure_zapret
     configure_sysctl
-    install_gateway_script
+    install_gateway
+
     install_adguard
     install_web_panel
-    copy_strategies
     install_services
-    setup_zapret_service
-    start_services
+    configure_static_ip
+    start_everything
+
     print_summary
 }
 
