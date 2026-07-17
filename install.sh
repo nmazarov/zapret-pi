@@ -334,12 +334,18 @@ EOF
     fi
 
     # Копируем вспомогательные скрипты
-    for script in test-connection.sh detect-network.sh; do
+    for script in test-connection.sh detect-network.sh menu.sh; do
         if [[ -f "$PROJECT_DIR/scripts/$script" ]]; then
             cp "$PROJECT_DIR/scripts/$script" /opt/zapret-pi/"$script"
             chmod +x /opt/zapret-pi/"$script"
         fi
     done
+    
+    # Создаем симлинк для удобного вызова меню
+    if [[ -f /opt/zapret-pi/menu.sh ]]; then
+        ln -sf /opt/zapret-pi/menu.sh /usr/local/bin/zapret-pi
+        ok "Симлинк меню установлен (sudo zapret-pi)"
+    fi
 }
 
 
@@ -535,24 +541,25 @@ print_summary() {
     echo -e "   ${CYAN}└──────────────────────────────────────────────────────┘${NC}"
     echo ""
 
-    echo -e "   ${BOLD}📺 Настройка устройств${NC} (укажи шлюз и DNS → ${CYAN}${RPI_IP}${NC}):"
+    echo -e "   ${BOLD}📺 Настройка устройств${NC} (укажи шлюз → ${CYAN}${RPI_IP}${NC}):"
     echo ""
     echo -e "   ┌──────────┬─────────────────────────────────────────────┐"
     echo -e "   │ ${BOLD}PS5/PS4${NC}  │ Настройки → Сеть → Шлюз: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((14 - ${#RPI_IP})) '')│"
-    echo -e "   │          │ DNS: ${CYAN}${RPI_IP}${NC} / ${DIM}8.8.8.8${NC}$(printf '%*s' $((23 - ${#RPI_IP})) '')│"
+    echo -e "   │          │ DNS: ${CYAN}8.8.8.8${NC} / IP роутера                   │"
     echo -e "   ├──────────┼─────────────────────────────────────────────┤"
     echo -e "   │ ${BOLD}ПК${NC}       │ Сетевые настройки → IPv4 → Шлюз: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((8 - ${#RPI_IP})) '')│"
-    echo -e "   │          │ DNS: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((34 - ${#RPI_IP})) '')│"
+    echo -e "   │          │ DNS: ${CYAN}8.8.8.8${NC} / IP роутера                   │"
     echo -e "   ├──────────┼─────────────────────────────────────────────┤"
     echo -e "   │ ${BOLD}Smart TV${NC} │ Настройки сети → Шлюз: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((17 - ${#RPI_IP})) '')│"
-    echo -e "   │          │ DNS: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((34 - ${#RPI_IP})) '')│"
+    echo -e "   │          │ DNS: ${CYAN}8.8.8.8${NC} / IP роутера                   │"
     echo -e "   ├──────────┼─────────────────────────────────────────────┤"
     echo -e "   │ ${BOLD}Телефон${NC}  │ Wi-Fi → Статический IP → Шлюз: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((9 - ${#RPI_IP})) '')│"
-    echo -e "   │          │ DNS: ${CYAN}${RPI_IP}${NC}$(printf '%*s' $((34 - ${#RPI_IP})) '')│"
+    echo -e "   │          │ DNS: ${CYAN}8.8.8.8${NC} / IP роутера                   │"
     echo -e "   └──────────┴─────────────────────────────────────────────┘"
     echo ""
 
     echo -e "   ${BOLD}🔧 Полезные команды:${NC}"
+    echo -e "   ${DIM}Меню:${NC}         sudo zapret-pi"
     echo -e "   ${DIM}Статус:${NC}       sudo systemctl status zapret zapret-gateway zapret-web"
     echo -e "   ${DIM}Перезапуск:${NC}   sudo systemctl restart zapret zapret-gateway"
     echo -e "   ${DIM}Логи:${NC}         sudo journalctl -u zapret -f"
