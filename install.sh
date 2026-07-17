@@ -521,7 +521,7 @@ start_everything() {
     fi
 
     # Проверяем nfqws
-    sleep 1
+    sleep 3
     if pgrep -x nfqws > /dev/null 2>&1; then
         ok "nfqws процесс активен ✓"
     else
