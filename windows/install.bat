@@ -71,7 +71,7 @@ if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
 :: Проверка git
 where git >nul 2>&1
 if %errorlevel% neq 0 (
-    echo   [!] Git не найден. Попробуем скачать zapret через curl...
+    echo   [i] Git не найден. Попробуем скачать zapret через curl...
     set "USE_GIT=0"
 ) else (
     echo   [OK] Git найден
@@ -81,7 +81,7 @@ if %errorlevel% neq 0 (
 :: Проверка curl (встроен в Windows 10+)
 where curl >nul 2>&1
 if %errorlevel% neq 0 (
-    echo   [!] curl не найден
+    echo   [ВНИМАНИЕ] curl не найден
     if "!USE_GIT!"=="0" (
         echo   [ОШИБКА] Нужен git или curl для скачивания zapret!
         echo   Установи git: https://git-scm.com/download/win
@@ -117,7 +117,7 @@ if exist "%ZAPRET_DIR%\.git" (
         echo   [i] Клонирование zapret...
         git clone --quiet --depth=1 "%ZAPRET_REPO%" "%ZAPRET_DIR%"
         if !errorlevel! neq 0 (
-            echo   [!] Ошибка git clone. Пробуем скачать через curl...
+            echo   [i] Ошибка git clone. Пробуем скачать через curl...
             set "USE_GIT=0"
         )
     )
@@ -127,11 +127,11 @@ if exist "%ZAPRET_DIR%\.git" (
         mkdir "%ZAPRET_DIR%" 2>nul
         curl -sL "https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
         if !errorlevel! neq 0 (
-            echo   [!] Ошибка curl. Пробуем скачать через зеркало (ghproxy)...
+            echo   [i] Ошибка curl. Пробуем скачать через зеркало ^(ghproxy^)...
             curl -sL "https://mirror.ghproxy.com/https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
         )
         if !errorlevel! neq 0 (
-            echo   [ОШИБКА] Не удалось скачать zapret даже через зеркало! Проверьте интернет.
+            echo   [ОШИБКА] Не удалось скачать zapret даже через зеркало. Проверьте интернет.
             pause
             exit /b 1
         )
@@ -190,7 +190,7 @@ if exist "%ZAPRET_DIR%\bin\winws.exe" (
 if exist "%ZAPRET_DIR%\bin\WinDivert.dll" (
     echo   [OK] WinDivert.dll найден
 ) else (
-    echo   [!] WinDivert.dll не найден — winws может не работать
+    echo   [ВНИМАНИЕ] WinDivert.dll не найден — winws может не работать
 )
 
 echo.
