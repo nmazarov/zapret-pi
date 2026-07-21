@@ -68,22 +68,7 @@ if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
     exit /b 1
 )
 
-:: Мы больше не используем git, так как он может зависать при DPI блокировках
-set "USE_GIT=0"
-
-:: Проверка curl (встроен в Windows 10+)
-where curl >nul 2>&1
-if %errorlevel% neq 0 (
-    echo   [ВНИМАНИЕ] curl не найден
-    if "!USE_GIT!"=="0" (
-        echo   [ОШИБКА] Нужен git или curl для скачивания zapret!
-        echo   Установи git: https://git-scm.com/download/win
-        pause
-        exit /b 1
-    )
-) else (
-    echo   [OK] curl найден
-)
+:: Git и curl больше не требуются, так как Zapret поставляется вместе с проектом
 
 echo.
 
@@ -94,30 +79,14 @@ echo.
 echo   ━━━ Шаг 2/5 — Загрузка Zapret ━━━
 echo.
 
-if exist "%ZAPRET_DIR%" (
-    echo   [i] Очистка старой установки...
-    rmdir /s /q "%ZAPRET_DIR%" 2>nul
-)
-
-echo   [i] Скачивание zapret через curl...
-mkdir "%ZAPRET_DIR%" 2>nul
-curl --connect-timeout 10 --max-time 60 -sL "https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
-if !errorlevel! neq 0 (
-    echo   [i] Ошибка curl. Пробуем скачать через зеркало ^(ghproxy.net^)...
-    curl --connect-timeout 10 --max-time 60 -sL "https://ghproxy.net/https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
-)
-if !errorlevel! neq 0 (
-    echo   [ОШИБКА] Не удалось скачать zapret даже через зеркало. Проверьте интернет.
+if not exist "%ZAPRET_DIR%\bin\winws.exe" (
+    echo   [ОШИБКА] Файлы Zapret не найдены в папке %ZAPRET_DIR%
+    echo   Убедитесь, что вы скачали архив целиком вместе с папкой zapret.
     pause
     exit /b 1
 )
-echo   [i] Распаковка...
-powershell -Command "Expand-Archive -Path '%ZAPRET_DIR%\zapret.zip' -DestinationPath '%ZAPRET_DIR%\temp' -Force"
-xcopy "%ZAPRET_DIR%\temp\zapret-discord-youtube-main\*" "%ZAPRET_DIR%\" /s /e /q /y >nul
-rmdir /s /q "%ZAPRET_DIR%\temp" 2>nul
-del "%ZAPRET_DIR%\zapret.zip" 2>nul
 
-echo   [OK] Zapret загружен
+echo   [OK] Встроенный Zapret найден локально
 
 echo.
 

@@ -201,21 +201,13 @@ install_zapret() {
     step "⚡ Шаг 2/9 — Установка Zapret"
 
     # Клонирование
-    if [[ -d /opt/zapret/.git ]]; then
-        substep "Проверка актуальной версии Zapret на GitHub..."
-        cd /opt/zapret && git pull --quiet 2>/dev/null || true
+    substep "Установка встроенной версии zapret..."
+    rm -rf /opt/zapret
+    if [[ -d "linux/zapret" ]]; then
+        cp -r linux/zapret /opt/zapret
     else
-        substep "Клонирование zapret..."
-        rm -rf /opt/zapret
-        git clone --quiet --depth=1 https://github.com/bol-van/zapret.git /opt/zapret
-        if [[ $? -ne 0 ]]; then
-            warn "Ошибка скачивания с GitHub, пробуем зеркало..."
-            git clone --quiet --depth=1 https://ghproxy.net/https://github.com/bol-van/zapret.git /opt/zapret
-            if [[ $? -ne 0 ]]; then
-                fail "Не удалось скачать zapret!"
-                exit 1
-            fi
-        fi
+        fail "Встроенная папка linux/zapret не найдена! Скачайте проект целиком."
+        exit 1
     fi
     ok "Zapret загружен"
 
