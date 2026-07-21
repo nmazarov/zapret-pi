@@ -103,8 +103,8 @@ echo   [i] Скачивание zapret через curl...
 mkdir "%ZAPRET_DIR%" 2>nul
 curl --connect-timeout 10 --max-time 60 -sL "https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
 if !errorlevel! neq 0 (
-    echo   [i] Ошибка curl. Пробуем скачать через зеркало ^(ghproxy^)...
-    curl --connect-timeout 10 --max-time 60 -sL "https://mirror.ghproxy.com/https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
+    echo   [i] Ошибка curl. Пробуем скачать через зеркало ^(ghproxy.net^)...
+    curl --connect-timeout 10 --max-time 60 -sL "https://ghproxy.net/https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
 )
 if !errorlevel! neq 0 (
     echo   [ОШИБКА] Не удалось скачать zapret даже через зеркало. Проверьте интернет.

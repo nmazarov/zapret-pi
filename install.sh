@@ -210,7 +210,7 @@ install_zapret() {
         git clone --quiet --depth=1 https://github.com/bol-van/zapret.git /opt/zapret
         if [[ $? -ne 0 ]]; then
             warn "Ошибка скачивания с GitHub, пробуем зеркало..."
-            git clone --quiet --depth=1 https://mirror.ghproxy.com/https://github.com/bol-van/zapret.git /opt/zapret
+            git clone --quiet --depth=1 https://ghproxy.net/https://github.com/bol-van/zapret.git /opt/zapret
             if [[ $? -ne 0 ]]; then
                 fail "Не удалось скачать zapret!"
                 exit 1
@@ -251,7 +251,7 @@ download_flowseal_lists() {
     
     substep "Скачивание списков доменов..."
     local raw_url="https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists"
-    local mirror_url="https://mirror.ghproxy.com/https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists"
+    local mirror_url="https://ghproxy.net/https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists"
 
     for list in list-general.txt list-google.txt list-exclude.txt ipset-exclude.txt ipset-all.txt; do
         curl -sL "$raw_url/$list" -o "$lists_dir/$list" || curl -sL "$mirror_url/$list" -o "$lists_dir/$list"
