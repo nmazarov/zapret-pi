@@ -7,7 +7,7 @@ setlocal EnableDelayedExpansion
 ::  Полностью удаляет все компоненты zapret
 :: ═══════════════════════════════════════════════════════════════════════════════
 
-set "ZAPRET_DIR=C:\zapret"
+set "ZAPRET_DIR=%~dp0zapret"
 set "TASK_NAME=ZapretWinWS"
 
 :: ─── Проверка прав администратора ───────────────────────────────────────────

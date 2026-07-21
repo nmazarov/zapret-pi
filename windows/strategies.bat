@@ -7,7 +7,7 @@ setlocal EnableDelayedExpansion
 ::  Позволяет переключить стратегию обхода DPI
 :: ═══════════════════════════════════════════════════════════════════════════════
 
-set "ZAPRET_DIR=C:\zapret"
+set "ZAPRET_DIR=%~dp0zapret"
 set "CONFIG_FILE=%ZAPRET_DIR%\zapret-winws.ini"
 set "TASK_NAME=ZapretWinWS"
 

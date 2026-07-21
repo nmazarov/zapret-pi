@@ -8,7 +8,7 @@ setlocal EnableDelayedExpansion
 ::  github.com/nmazarov/zapret-pi
 :: ═══════════════════════════════════════════════════════════════════════════════
 
-set "ZAPRET_DIR=C:\zapret"
+set "ZAPRET_DIR=%~dp0zapret"
 set "ZAPRET_REPO=https://github.com/bol-van/zapret.git"
 set "WINWS_EXE=%ZAPRET_DIR%\binaries\win64\winws.exe"
 set "CONFIG_FILE=%ZAPRET_DIR%\zapret-winws.ini"
