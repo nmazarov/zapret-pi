@@ -9,8 +9,8 @@ setlocal EnableDelayedExpansion
 :: ═══════════════════════════════════════════════════════════════════════════════
 
 set "ZAPRET_DIR=%~dp0zapret"
-set "ZAPRET_REPO=https://github.com/bol-van/zapret.git"
-set "WINWS_EXE=%ZAPRET_DIR%\binaries\win64\winws.exe"
+set "ZAPRET_REPO=https://github.com/Flowseal/zapret-discord-youtube.git"
+set "WINWS_EXE=%ZAPRET_DIR%\bin\winws.exe"
 set "CONFIG_FILE=%ZAPRET_DIR%\zapret-winws.ini"
 set "TASK_NAME=ZapretWinWS"
 set "VERSION=1.0"
@@ -102,7 +102,7 @@ echo   ━━━ Шаг 2/5 — Загрузка Zapret ━━━
 echo.
 
 if exist "%ZAPRET_DIR%\.git" (
-    echo   [i] Zapret уже установлен, обновляем...
+    echo   [i] Проверка актуальной версии Zapret на GitHub...
     pushd "%ZAPRET_DIR%"
     git pull --quiet 2>nul
     popd
@@ -124,7 +124,7 @@ if exist "%ZAPRET_DIR%\.git" (
     ) else (
         echo   [i] Скачивание zapret через curl...
         mkdir "%ZAPRET_DIR%" 2>nul
-        curl -sL "https://github.com/bol-van/zapret/archive/refs/heads/master.zip" -o "%ZAPRET_DIR%\zapret.zip"
+        curl -sL "https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
         if !errorlevel! neq 0 (
             echo   [ОШИБКА] Не удалось скачать zapret!
             pause
@@ -132,12 +132,44 @@ if exist "%ZAPRET_DIR%\.git" (
         )
         echo   [i] Распаковка...
         powershell -Command "Expand-Archive -Path '%ZAPRET_DIR%\zapret.zip' -DestinationPath '%ZAPRET_DIR%\temp' -Force"
-        xcopy "%ZAPRET_DIR%\temp\zapret-master\*" "%ZAPRET_DIR%\" /s /e /q /y >nul
+        xcopy "%ZAPRET_DIR%\temp\zapret-discord-youtube-main\*" "%ZAPRET_DIR%\" /s /e /q /y >nul
         rmdir /s /q "%ZAPRET_DIR%\temp" 2>nul
         del "%ZAPRET_DIR%\zapret.zip" 2>nul
     )
     echo   [OK] Zapret загружен
 )
+
+echo.
+
+:: ═══════════════════════════════════════════════════════════════════════════════
+::  ШАГ 2.5: СКАЧИВАНИЕ СПИСКОВ FLOWSEAL
+:: ═══════════════════════════════════════════════════════════════════════════════
+echo   ━━━ Шаг 2.5 — Загрузка списков Flowseal ━━━
+echo.
+set "LISTS_DIR=%ZAPRET_DIR%\lists"
+if not exist "%LISTS_DIR%" mkdir "%LISTS_DIR%"
+
+echo   [i] Скачивание списков доменов...
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-general.txt" -o "%LISTS_DIR%\list-general.txt"
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-google.txt" -o "%LISTS_DIR%\list-google.txt"
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-exclude.txt" -o "%LISTS_DIR%\list-exclude.txt"
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/ipset-exclude.txt" -o "%LISTS_DIR%\ipset-exclude.txt"
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/ipset-all.txt" -o "%LISTS_DIR%\ipset-all.txt"
+
+:: Скачивание payload-файлов
+set "BIN_DIR=%ZAPRET_DIR%\files\fake"
+if not exist "%BIN_DIR%" mkdir "%BIN_DIR%"
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/bin/quic_initial_dbankcloud_ru.bin" -o "%BIN_DIR%\quic_initial_dbankcloud_ru.bin"
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/bin/quic_initial_www_google_com.bin" -o "%BIN_DIR%\quic_initial_www_google_com.bin"
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/bin/tls_clienthello_4pda_to.bin" -o "%BIN_DIR%\tls_clienthello_4pda_to.bin"
+curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/bin/tls_clienthello_www_google_com.bin" -o "%BIN_DIR%\tls_clienthello_www_google_com.bin"
+
+:: Создаем пустые user-листы, чтобы winws не ругался
+echo. > "%LISTS_DIR%\list-general-user.txt"
+echo. > "%LISTS_DIR%\list-exclude-user.txt"
+echo. > "%LISTS_DIR%\ipset-exclude-user.txt"
+
+echo   [OK] Списки Flowseal успешно скачаны
 
 echo.
 
@@ -148,26 +180,19 @@ echo.
 echo   ━━━ Шаг 3/5 — Проверка winws.exe ━━━
 echo.
 
-:: Определяем путь к winws.exe в зависимости от архитектуры
-if exist "%ZAPRET_DIR%\binaries\%ARCH%\winws.exe" (
-    set "WINWS_EXE=%ZAPRET_DIR%\binaries\%ARCH%\winws.exe"
-    echo   [OK] winws.exe найден: !WINWS_EXE!
-) else if exist "%ZAPRET_DIR%\binaries\win64\winws.exe" (
-    set "WINWS_EXE=%ZAPRET_DIR%\binaries\win64\winws.exe"
+if exist "%ZAPRET_DIR%\bin\winws.exe" (
     echo   [OK] winws.exe найден: !WINWS_EXE!
 ) else (
     echo   [ОШИБКА] winws.exe не найден!
     echo   Проверьте что zapret скачался корректно.
-    echo   Путь: %ZAPRET_DIR%\binaries\
-    dir "%ZAPRET_DIR%\binaries\" /s 2>nul | findstr "winws"
+    echo   Путь: %ZAPRET_DIR%\bin\
+    dir "%ZAPRET_DIR%\bin\" /s 2>nul | findstr "winws"
     pause
     exit /b 1
 )
 
 :: Проверка WinDivert
-if exist "%ZAPRET_DIR%\binaries\%ARCH%\WinDivert.dll" (
-    echo   [OK] WinDivert.dll найден
-) else if exist "%ZAPRET_DIR%\binaries\win64\WinDivert.dll" (
+if exist "%ZAPRET_DIR%\bin\WinDivert.dll" (
     echo   [OK] WinDivert.dll найден
 ) else (
     echo   [!] WinDivert.dll не найден — winws может не работать

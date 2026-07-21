@@ -202,7 +202,7 @@ install_zapret() {
 
     # Клонирование
     if [[ -d /opt/zapret/.git ]]; then
-        substep "Zapret уже есть, обновляем..."
+        substep "Проверка актуальной версии Zapret на GitHub..."
         cd /opt/zapret && git pull --quiet 2>/dev/null || true
     else
         substep "Клонирование zapret..."
@@ -229,6 +229,31 @@ install_zapret() {
         cd /opt/zapret && bash install_bin.sh > /dev/null 2>&1
         ok "Бинарники установлены"
     fi
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ШАГ 2.5: СПИСКИ FLOWSEAL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+download_flowseal_lists() {
+    step "📥 Шаг 2.5/9 — Загрузка списков Flowseal"
+    
+    local lists_dir="/opt/zapret-pi/lists"
+    mkdir -p "$lists_dir"
+    
+    substep "Скачивание списков доменов..."
+    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-general.txt" -o "$lists_dir/list-general.txt"
+    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-google.txt" -o "$lists_dir/list-google.txt"
+    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-exclude.txt" -o "$lists_dir/list-exclude.txt"
+    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/ipset-exclude.txt" -o "$lists_dir/ipset-exclude.txt"
+    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/ipset-all.txt" -o "$lists_dir/ipset-all.txt"
+
+    # Создаем пустые user-листы
+    touch "$lists_dir/list-general-user.txt"
+    touch "$lists_dir/list-exclude-user.txt"
+    touch "$lists_dir/ipset-exclude-user.txt"
+    
+    ok "Списки Flowseal успешно скачаны"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -583,6 +608,7 @@ main() {
 
     install_deps
     install_zapret
+    download_flowseal_lists
     configure_zapret
     configure_sysctl
     install_gateway

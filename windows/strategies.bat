@@ -67,6 +67,13 @@ set "S5_TITLE=MultiSplit + SeqOvl (максимальная)"
 set "S5_DESC=Множественная нарезка. Для самых жёстких DPI."
 set "S5_ARGS=--wf-tcp=80,443 --wf-udp=443 --dpi-desync=multisplit --dpi-desync-split-seqovl=2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,host+2 --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6"
 
+:: Стратегия 6: Flowseal (Discord + YouTube)
+set "S6_NAME=flowseal"
+set "S6_TITLE=Flowseal (Discord + YouTube)"
+set "S6_DESC=Комплексная стратегия. Требует загруженных списков Flowseal."
+set "S6_ARGS=--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 --filter-udp=443 --hostlist="!ZAPRET_DIR!\lists\list-general.txt" --hostlist="!ZAPRET_DIR!\lists\list-general-user.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude-user.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude-user.txt" --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-fake-quic="!ZAPRET_DIR!\files\fake\quic_initial_www_google_com.bin" --new --filter-udp=19294-19344,50000-50100 --filter-l7=discord,stun --dpi-desync=fake --dpi-desync-fake-discord="!ZAPRET_DIR!\files\fake\quic_initial_dbankcloud_ru.bin" --dpi-desync-fake-stun="!ZAPRET_DIR!\files\fake\quic_initial_dbankcloud_ru.bin" --dpi-desync-repeats=6 --new --filter-tcp=2053,2083,2087,2096,8443 --hostlist-domains=discord.media --dpi-desync=multisplit --dpi-desync-split-seqovl=681 --dpi-desync-split-pos=1 --dpi-desync-split-seqovl-pattern="!ZAPRET_DIR!\files\fake\tls_clienthello_www_google_com.bin" --new --filter-tcp=443 --hostlist="!ZAPRET_DIR!\lists\list-google.txt" --ip-id=zero --dpi-desync=multisplit --dpi-desync-split-seqovl=681 --dpi-desync-split-pos=1 --dpi-desync-split-seqovl-pattern="!ZAPRET_DIR!\files\fake\tls_clienthello_www_google_com.bin" --new --filter-tcp=80,443 --hostlist="!ZAPRET_DIR!\lists\list-general.txt" --hostlist="!ZAPRET_DIR!\lists\list-general-user.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude-user.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude-user.txt" --dpi-desync=multisplit --dpi-desync-split-seqovl=568 --dpi-desync-split-pos=1 --dpi-desync-split-seqovl-pattern="!ZAPRET_DIR!\files\fake\tls_clienthello_4pda_to.bin" --new --filter-udp=443 --ipset="!ZAPRET_DIR!\lists\ipset-all.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude-user.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude-user.txt" --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-fake-quic="!ZAPRET_DIR!\files\fake\quic_initial_www_google_com.bin" --new --filter-tcp=80,443,8443 --ipset="!ZAPRET_DIR!\lists\ipset-all.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude-user.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude-user.txt" --dpi-desync=multisplit --dpi-desync-split-seqovl=568 --dpi-desync-split-pos=1 --dpi-desync-split-seqovl-pattern="!ZAPRET_DIR!\files\fake\tls_clienthello_4pda_to.bin""
+
+
 :: ─── Текущая стратегия ──────────────────────────────────────────────────────
 set "CURRENT_STRATEGY="
 for /f "tokens=1,* delims==" %%a in ('type "%CONFIG_FILE%" 2^>nul ^| findstr "^STRATEGY="') do (
@@ -100,11 +107,14 @@ echo   │                                                          │
 echo   │  5) %S5_TITLE%
 echo   │     %S5_DESC%
 echo   │                                                          │
+echo   │  6) %S6_TITLE%
+echo   │     %S6_DESC%
+echo   │                                                          │
 echo   └──────────────────────────────────────────────────────────┘
 echo.
 echo   0) Выход
 echo.
-set /p "choice=  Выберите стратегию [0-5]: "
+set /p "choice=  Выберите стратегию [0-6]: "
 
 if "%choice%"=="1" (
     set "SEL_NAME=!S1_NAME!"
@@ -134,6 +144,12 @@ if "%choice%"=="5" (
     set "SEL_NAME=!S5_NAME!"
     set "SEL_TITLE=!S5_TITLE!"
     set "SEL_ARGS=!S5_ARGS!"
+    goto :apply
+)
+if "%choice%"=="6" (
+    set "SEL_NAME=!S6_NAME!"
+    set "SEL_TITLE=!S6_TITLE!"
+    set "SEL_ARGS=!S6_ARGS!"
     goto :apply
 )
 if "%choice%"=="0" exit /b 0
