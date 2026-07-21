@@ -21,6 +21,8 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+if "%1"=="load_strategies" goto load_strategies
+
 :: ─── Определяем winws.exe ──────────────────────────────────────────────────
 set "WINWS_EXE="
 if exist "%ZAPRET_DIR%\binaries\win64\winws.exe" (
@@ -36,6 +38,7 @@ if "%WINWS_EXE%"=="" (
 )
 
 :: ─── Стратегии ──────────────────────────────────────────────────────────────
+:load_strategies
 
 :: Стратегия 1: Универсальная (md5sig)
 set "S1_NAME=universal_md5sig"
@@ -72,6 +75,10 @@ set "S6_NAME=flowseal"
 set "S6_TITLE=Flowseal (Discord + YouTube)"
 set "S6_DESC=Комплексная стратегия. Требует загруженных списков Flowseal."
 set "S6_ARGS=--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 --filter-udp=443 --hostlist="!ZAPRET_DIR!\lists\list-general.txt" --hostlist="!ZAPRET_DIR!\lists\list-general-user.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude-user.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude-user.txt" --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-fake-quic="!ZAPRET_DIR!\files\fake\quic_initial_www_google_com.bin" --new --filter-udp=19294-19344,50000-50100 --filter-l7=discord,stun --dpi-desync=fake --dpi-desync-fake-discord="!ZAPRET_DIR!\files\fake\quic_initial_dbankcloud_ru.bin" --dpi-desync-fake-stun="!ZAPRET_DIR!\files\fake\quic_initial_dbankcloud_ru.bin" --dpi-desync-repeats=6 --new --filter-tcp=2053,2083,2087,2096,8443 --hostlist-domains=discord.media --dpi-desync=multisplit --dpi-desync-split-seqovl=681 --dpi-desync-split-pos=1 --dpi-desync-split-seqovl-pattern="!ZAPRET_DIR!\files\fake\tls_clienthello_www_google_com.bin" --new --filter-tcp=443 --hostlist="!ZAPRET_DIR!\lists\list-google.txt" --ip-id=zero --dpi-desync=multisplit --dpi-desync-split-seqovl=681 --dpi-desync-split-pos=1 --dpi-desync-split-seqovl-pattern="!ZAPRET_DIR!\files\fake\tls_clienthello_www_google_com.bin" --new --filter-tcp=80,443 --hostlist="!ZAPRET_DIR!\lists\list-general.txt" --hostlist="!ZAPRET_DIR!\lists\list-general-user.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude-user.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude-user.txt" --dpi-desync=multisplit --dpi-desync-split-seqovl=568 --dpi-desync-split-pos=1 --dpi-desync-split-seqovl-pattern="!ZAPRET_DIR!\files\fake\tls_clienthello_4pda_to.bin" --new --filter-udp=443 --ipset="!ZAPRET_DIR!\lists\ipset-all.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude-user.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude-user.txt" --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-fake-quic="!ZAPRET_DIR!\files\fake\quic_initial_www_google_com.bin" --new --filter-tcp=80,443,8443 --ipset="!ZAPRET_DIR!\lists\ipset-all.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude.txt" --hostlist-exclude="!ZAPRET_DIR!\lists\list-exclude-user.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude.txt" --ipset-exclude="!ZAPRET_DIR!\lists\ipset-exclude-user.txt" --dpi-desync=multisplit --dpi-desync-split-seqovl=568 --dpi-desync-split-pos=1 --dpi-desync-split-seqovl-pattern="!ZAPRET_DIR!\files\fake\tls_clienthello_4pda_to.bin""
+
+if "%1"=="load_strategies" exit /b 0
+
+:show_menu
 
 
 :: ─── Текущая стратегия ──────────────────────────────────────────────────────
