@@ -92,6 +92,12 @@ windows\install.bat
 
 #### Управление
 
+Основной способ — интерактивное меню (запускать от администратора):
+```
+windows\menu.bat
+```
+
+Либо отдельные команды:
 ```
 windows\service.bat start    — запустить
 windows\service.bat stop     — остановить

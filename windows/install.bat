@@ -284,6 +284,7 @@ echo   │                                                      │
 echo   └──────────────────────────────────────────────────────┘
 echo.
 echo   Полезные команды:
+echo     menu.bat               — интерактивное меню управления (РЕКОМЕНДУЕТСЯ)
 echo     service.bat start      — запустить winws
 echo     service.bat stop       — остановить winws
 echo     service.bat status     — проверить статус
