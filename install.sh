@@ -208,6 +208,14 @@ install_zapret() {
         substep "Клонирование zapret..."
         rm -rf /opt/zapret
         git clone --quiet --depth=1 https://github.com/bol-van/zapret.git /opt/zapret
+        if [[ $? -ne 0 ]]; then
+            warn "Ошибка скачивания с GitHub, пробуем зеркало..."
+            git clone --quiet --depth=1 https://mirror.ghproxy.com/https://github.com/bol-van/zapret.git /opt/zapret
+            if [[ $? -ne 0 ]]; then
+                fail "Не удалось скачать zapret!"
+                exit 1
+            fi
+        fi
     fi
     ok "Zapret загружен"
 
@@ -242,11 +250,12 @@ download_flowseal_lists() {
     mkdir -p "$lists_dir"
     
     substep "Скачивание списков доменов..."
-    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-general.txt" -o "$lists_dir/list-general.txt"
-    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-google.txt" -o "$lists_dir/list-google.txt"
-    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-exclude.txt" -o "$lists_dir/list-exclude.txt"
-    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/ipset-exclude.txt" -o "$lists_dir/ipset-exclude.txt"
-    curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/ipset-all.txt" -o "$lists_dir/ipset-all.txt"
+    local raw_url="https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists"
+    local mirror_url="https://mirror.ghproxy.com/https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists"
+
+    for list in list-general.txt list-google.txt list-exclude.txt ipset-exclude.txt ipset-all.txt; do
+        curl -sL "$raw_url/$list" -o "$lists_dir/$list" || curl -sL "$mirror_url/$list" -o "$lists_dir/$list"
+    done
 
     # Создаем пустые user-листы
     touch "$lists_dir/list-general-user.txt"

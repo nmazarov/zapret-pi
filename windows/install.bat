@@ -117,16 +117,21 @@ if exist "%ZAPRET_DIR%\.git" (
         echo   [i] Клонирование zapret...
         git clone --quiet --depth=1 "%ZAPRET_REPO%" "%ZAPRET_DIR%"
         if !errorlevel! neq 0 (
-            echo   [ОШИБКА] Не удалось клонировать zapret!
-            pause
-            exit /b 1
+            echo   [!] Ошибка git clone. Пробуем скачать через curl...
+            set "USE_GIT=0"
         )
-    ) else (
+    )
+
+    if "!USE_GIT!"=="0" (
         echo   [i] Скачивание zapret через curl...
         mkdir "%ZAPRET_DIR%" 2>nul
         curl -sL "https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
         if !errorlevel! neq 0 (
-            echo   [ОШИБКА] Не удалось скачать zapret!
+            echo   [!] Ошибка curl. Пробуем скачать через зеркало (ghproxy)...
+            curl -sL "https://mirror.ghproxy.com/https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
+        )
+        if !errorlevel! neq 0 (
+            echo   [ОШИБКА] Не удалось скачать zapret даже через зеркало! Проверьте интернет.
             pause
             exit /b 1
         )
@@ -144,25 +149,15 @@ echo.
 :: ═══════════════════════════════════════════════════════════════════════════════
 ::  ШАГ 2.5: СКАЧИВАНИЕ СПИСКОВ FLOWSEAL
 :: ═══════════════════════════════════════════════════════════════════════════════
-echo   ━━━ Шаг 2.5 — Загрузка списков Flowseal ━━━
+echo   ━━━ Шаг 2.5 — Подготовка списков Flowseal ━━━
 echo.
 set "LISTS_DIR=%ZAPRET_DIR%\lists"
 if not exist "%LISTS_DIR%" mkdir "%LISTS_DIR%"
 
-echo   [i] Скачивание списков доменов...
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-general.txt" -o "%LISTS_DIR%\list-general.txt"
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-google.txt" -o "%LISTS_DIR%\list-google.txt"
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/list-exclude.txt" -o "%LISTS_DIR%\list-exclude.txt"
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/ipset-exclude.txt" -o "%LISTS_DIR%\ipset-exclude.txt"
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists/ipset-all.txt" -o "%LISTS_DIR%\ipset-all.txt"
-
-:: Скачивание payload-файлов
+:: Копирование payload-файлов туда, где их ждет strategies.bat
 set "BIN_DIR=%ZAPRET_DIR%\files\fake"
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%"
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/bin/quic_initial_dbankcloud_ru.bin" -o "%BIN_DIR%\quic_initial_dbankcloud_ru.bin"
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/bin/quic_initial_www_google_com.bin" -o "%BIN_DIR%\quic_initial_www_google_com.bin"
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/bin/tls_clienthello_4pda_to.bin" -o "%BIN_DIR%\tls_clienthello_4pda_to.bin"
-curl -sL "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/bin/tls_clienthello_www_google_com.bin" -o "%BIN_DIR%\tls_clienthello_www_google_com.bin"
+if exist "%ZAPRET_DIR%\bin\*.bin" xcopy "%ZAPRET_DIR%\bin\*.bin" "%BIN_DIR%\" /y /q >nul
 
 :: Создаем пустые user-листы, чтобы winws не ругался
 echo. > "%LISTS_DIR%\list-general-user.txt"
