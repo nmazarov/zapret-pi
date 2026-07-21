@@ -11,8 +11,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License MIT"/>
-  <img src="https://img.shields.io/badge/platform-Raspberry%20Pi-c51a4a?style=flat-square&logo=raspberry-pi" alt="Platform"/>
-  <img src="https://img.shields.io/badge/language-Bash%20%7C%20Python-blue?style=flat-square" alt="Language"/>
+  <img src="https://img.shields.io/badge/platform-Raspberry%20Pi%20%7C%20Windows-c51a4a?style=flat-square&logo=raspberry-pi" alt="Platform"/>
+  <img src="https://img.shields.io/badge/language-Bash%20%7C%20Python%20%7C%20Batch-blue?style=flat-square" alt="Language"/>
   <img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square" alt="Status"/>
 </p>
 
@@ -25,20 +25,23 @@
 - 🔓 **Обходит DPI-блокировки** — YouTube, Discord, Instagram, Twitter, EA серверы и другие
 
 - 🎮 **Работает для всех устройств** — PS5, ПК, Smart TV, телефоны
+- 💻 **Windows-версия** — обход DPI прямо на ПК без Raspberry Pi
 - ⚡ **Без VPN** — нативная скорость, минимальный пинг
-- 🖥️ **Веб-панель** — управление через браузер
+- 🖥️ **Веб-панель** — управление через браузер (Raspberry Pi)
 
 ---
 
 ## 🚀 Быстрый старт
 
-### Требования
+### 🐧 Raspberry Pi / Linux
+
+#### Требования
 
 - Raspberry Pi (2+ ГБ RAM) с Raspberry Pi OS / Debian / Ubuntu
 - Ethernet-подключение к роутеру
 - SSH-доступ
 
-### Установка
+#### Установка
 
 ```bash
 git clone https://github.com/nmazarov/zapret-pi.git
@@ -49,18 +52,60 @@ sudo bash install.sh
 **Всё.** Скрипт автоматически:
 - Определит сеть (IP, роутер, интерфейс)
 - Установит и соберёт Zapret
-
 - Настроит NAT, iptables, NFQUEUE
 - Развернёт веб-панель
 - Запустит все сервисы
 - Покажет инструкции для подключения устройств
 
-### Удаление
+#### Удаление
 
 ```bash
 cd zapret-pi
 sudo bash uninstall.sh
 ```
+
+---
+
+### 💻 Windows
+
+#### Требования
+
+- Windows 10 / 11 (x64)
+- Права администратора
+- Git (опционально, можно обойтись curl)
+
+#### Установка
+
+1. Скачай или клонируй репозиторий
+2. Открой папку `windows/`
+3. Запусти `install.bat` **от имени администратора**
+
+```
+windows\install.bat
+```
+
+Скрипт автоматически:
+- Скачает Zapret (winws.exe) с GitHub
+- Создаст конфигурацию с оптимальной стратегией
+- Настроит автозапуск через Планировщик задач
+- Запустит обход DPI
+
+#### Управление
+
+```
+windows\service.bat start    — запустить
+windows\service.bat stop     — остановить
+windows\service.bat status   — статус
+windows\strategies.bat       — сменить стратегию
+```
+
+#### Удаление
+
+```
+windows\uninstall.bat
+```
+
+> 💡 **Разница с Raspberry Pi:** На Windows обход DPI работает только на самом ПК. Raspberry Pi работает как шлюз для **всех** устройств в сети (PS5, телефоны, Smart TV).
 
 ---
 
@@ -144,8 +189,8 @@ sudo ./blockcheck.sh
 
 ```
 zapret-pi/
-├── install.sh              # Автоустановщик (sudo bash install.sh)
-├── uninstall.sh            # Удаление (sudo bash uninstall.sh)
+├── install.sh              # Автоустановщик Linux (sudo bash install.sh)
+├── uninstall.sh            # Удаление Linux (sudo bash uninstall.sh)
 ├── config/
 │   ├── default.conf        # Конфиг Zapret (nfqws)
 │   ├── strategies.json     # 5 стратегий DPI bypass
@@ -154,11 +199,17 @@ zapret-pi/
 ├── scripts/
 │   ├── gateway-setup.sh    # NAT / iptables / NFQUEUE
 │   ├── test-connection.sh  # Диагностика
-│   └── detect-network.sh   # Автоопределение сети
+│   ├── detect-network.sh   # Автоопределение сети
+│   └── menu.sh             # Интерактивное меню
 ├── web/
 │   ├── app.py              # Flask API (backend)
 │   └── static/
 │       └── index.html      # Веб-панель (frontend)
+├── windows/                # 💻 Windows-версия
+│   ├── install.bat         # Установка для Windows
+│   ├── uninstall.bat       # Удаление для Windows
+│   ├── service.bat         # Управление службой (start/stop/status)
+│   └── strategies.bat      # Выбор стратегии DPI bypass
 └── systemd/
     ├── zapret-gateway.service
     └── zapret-web.service
@@ -214,7 +265,7 @@ sudo iptables -t nat -L -n
 У каждого провайдера свой DPI. Поэтому нужно подобрать стратегию — используй `blockcheck.sh` или переключай стратегии в веб-панели.
 
 **Q: Можно использовать без Raspberry Pi?**
-Да, скрипт работает на любом Debian/Ubuntu. Можно использовать VPS, старый ПК, или любой ARM SBC.
+Да! Для Windows есть отдельная версия в папке `windows/` — установи `install.bat` и обход DPI будет работать прямо на ПК. На Linux скрипт работает на любом Debian/Ubuntu — можно использовать VPS, старый ПК, или любой ARM SBC.
 
 ---
 

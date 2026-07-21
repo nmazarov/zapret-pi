@@ -1,0 +1,298 @@
+@echo off
+chcp 65001 >nul 2>&1
+setlocal EnableDelayedExpansion
+
+:: ═══════════════════════════════════════════════════════════════════════════════
+::  ZAPRET для WINDOWS — Автоматический установщик
+::  Обход DPI-блокировок на Windows (локально)
+::  github.com/nmazarov/zapret-pi
+:: ═══════════════════════════════════════════════════════════════════════════════
+
+set "ZAPRET_DIR=C:\zapret"
+set "ZAPRET_REPO=https://github.com/bol-van/zapret.git"
+set "WINWS_EXE=%ZAPRET_DIR%\binaries\win64\winws.exe"
+set "CONFIG_FILE=%ZAPRET_DIR%\zapret-winws.ini"
+set "TASK_NAME=ZapretWinWS"
+set "VERSION=1.0"
+
+:: ─── Проверка прав администратора ───────────────────────────────────────────
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo.
+    echo   [ОШИБКА] Этот скрипт нужно запускать от Администратора!
+    echo.
+    echo   Нажмите правой кнопкой мыши на файл и выберите
+    echo   "Запуск от имени администратора"
+    echo.
+    pause
+    exit /b 1
+)
+
+:: ─── Баннер ─────────────────────────────────────────────────────────────────
+cls
+echo.
+echo   ╔══════════════════════════════════════════════════════════╗
+echo   ║                                                        ║
+echo   ║   ███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗    ║
+echo   ║   ╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝    ║
+echo   ║     ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║       ║
+echo   ║    ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║       ║
+echo   ║   ███████╗██║  ██║██║     ██║  ██║███████╗   ██║       ║
+echo   ║   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝       ║
+echo   ║                                                        ║
+echo   ║          Windows Edition v%VERSION%                        ║
+echo   ║          DPI Bypass для Windows                        ║
+echo   ║                                                        ║
+echo   ╚══════════════════════════════════════════════════════════╝
+echo.
+echo   github.com/nmazarov/zapret-pi
+echo.
+
+:: ═══════════════════════════════════════════════════════════════════════════════
+::  ШАГ 1: ПРОВЕРКА ЗАВИСИМОСТЕЙ
+:: ═══════════════════════════════════════════════════════════════════════════════
+
+echo   ━━━ Шаг 1/5 — Проверка системы ━━━
+echo.
+
+:: Проверка архитектуры
+if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+    echo   [OK] Архитектура: x64
+    set "ARCH=win64"
+) else if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+    echo   [OK] Архитектура: x86
+    set "ARCH=win32"
+) else (
+    echo   [ОШИБКА] Неподдерживаемая архитектура: %PROCESSOR_ARCHITECTURE%
+    pause
+    exit /b 1
+)
+
+:: Проверка git
+where git >nul 2>&1
+if %errorlevel% neq 0 (
+    echo   [!] Git не найден. Попробуем скачать zapret через curl...
+    set "USE_GIT=0"
+) else (
+    echo   [OK] Git найден
+    set "USE_GIT=1"
+)
+
+:: Проверка curl (встроен в Windows 10+)
+where curl >nul 2>&1
+if %errorlevel% neq 0 (
+    echo   [!] curl не найден
+    if "!USE_GIT!"=="0" (
+        echo   [ОШИБКА] Нужен git или curl для скачивания zapret!
+        echo   Установи git: https://git-scm.com/download/win
+        pause
+        exit /b 1
+    )
+) else (
+    echo   [OK] curl найден
+)
+
+echo.
+
+:: ═══════════════════════════════════════════════════════════════════════════════
+::  ШАГ 2: СКАЧИВАНИЕ ZAPRET
+:: ═══════════════════════════════════════════════════════════════════════════════
+
+echo   ━━━ Шаг 2/5 — Загрузка Zapret ━━━
+echo.
+
+if exist "%ZAPRET_DIR%\.git" (
+    echo   [i] Zapret уже установлен, обновляем...
+    pushd "%ZAPRET_DIR%"
+    git pull --quiet 2>nul
+    popd
+    echo   [OK] Zapret обновлён
+) else (
+    if exist "%ZAPRET_DIR%" (
+        echo   [i] Очистка старой установки...
+        rmdir /s /q "%ZAPRET_DIR%" 2>nul
+    )
+
+    if "!USE_GIT!"=="1" (
+        echo   [i] Клонирование zapret...
+        git clone --quiet --depth=1 "%ZAPRET_REPO%" "%ZAPRET_DIR%"
+        if !errorlevel! neq 0 (
+            echo   [ОШИБКА] Не удалось клонировать zapret!
+            pause
+            exit /b 1
+        )
+    ) else (
+        echo   [i] Скачивание zapret через curl...
+        mkdir "%ZAPRET_DIR%" 2>nul
+        curl -sL "https://github.com/bol-van/zapret/archive/refs/heads/master.zip" -o "%ZAPRET_DIR%\zapret.zip"
+        if !errorlevel! neq 0 (
+            echo   [ОШИБКА] Не удалось скачать zapret!
+            pause
+            exit /b 1
+        )
+        echo   [i] Распаковка...
+        powershell -Command "Expand-Archive -Path '%ZAPRET_DIR%\zapret.zip' -DestinationPath '%ZAPRET_DIR%\temp' -Force"
+        xcopy "%ZAPRET_DIR%\temp\zapret-master\*" "%ZAPRET_DIR%\" /s /e /q /y >nul
+        rmdir /s /q "%ZAPRET_DIR%\temp" 2>nul
+        del "%ZAPRET_DIR%\zapret.zip" 2>nul
+    )
+    echo   [OK] Zapret загружен
+)
+
+echo.
+
+:: ═══════════════════════════════════════════════════════════════════════════════
+::  ШАГ 3: ПРОВЕРКА winws.exe
+:: ═══════════════════════════════════════════════════════════════════════════════
+
+echo   ━━━ Шаг 3/5 — Проверка winws.exe ━━━
+echo.
+
+:: Определяем путь к winws.exe в зависимости от архитектуры
+if exist "%ZAPRET_DIR%\binaries\%ARCH%\winws.exe" (
+    set "WINWS_EXE=%ZAPRET_DIR%\binaries\%ARCH%\winws.exe"
+    echo   [OK] winws.exe найден: !WINWS_EXE!
+) else if exist "%ZAPRET_DIR%\binaries\win64\winws.exe" (
+    set "WINWS_EXE=%ZAPRET_DIR%\binaries\win64\winws.exe"
+    echo   [OK] winws.exe найден: !WINWS_EXE!
+) else (
+    echo   [ОШИБКА] winws.exe не найден!
+    echo   Проверьте что zapret скачался корректно.
+    echo   Путь: %ZAPRET_DIR%\binaries\
+    dir "%ZAPRET_DIR%\binaries\" /s 2>nul | findstr "winws"
+    pause
+    exit /b 1
+)
+
+:: Проверка WinDivert
+if exist "%ZAPRET_DIR%\binaries\%ARCH%\WinDivert.dll" (
+    echo   [OK] WinDivert.dll найден
+) else if exist "%ZAPRET_DIR%\binaries\win64\WinDivert.dll" (
+    echo   [OK] WinDivert.dll найден
+) else (
+    echo   [!] WinDivert.dll не найден — winws может не работать
+)
+
+echo.
+
+:: ═══════════════════════════════════════════════════════════════════════════════
+::  ШАГ 4: КОНФИГУРАЦИЯ
+:: ═══════════════════════════════════════════════════════════════════════════════
+
+echo   ━━━ Шаг 4/5 — Настройка конфигурации ━━━
+echo.
+
+:: Создаём файл конфигурации с дефолтной стратегией
+if not exist "%CONFIG_FILE%" (
+    (
+        echo # Конфигурация Zapret для Windows
+        echo # Создано: %date% %time%
+        echo #
+        echo # Стратегия DPI bypass (аргументы для winws.exe^)
+        echo # Смените стратегию через strategies.bat или отредактируйте вручную
+        echo #
+        echo STRATEGY=universal_md5sig
+        echo ARGS=--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=2 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6
+    ) > "%CONFIG_FILE%"
+    echo   [OK] Конфигурация создана: %CONFIG_FILE%
+) else (
+    echo   [OK] Конфигурация уже существует
+)
+
+echo.
+
+:: ═══════════════════════════════════════════════════════════════════════════════
+::  ШАГ 5: АВТОЗАПУСК (TASK SCHEDULER)
+:: ═══════════════════════════════════════════════════════════════════════════════
+
+echo   ━━━ Шаг 5/5 — Настройка автозапуска ━━━
+echo.
+
+:: Удаляем старую задачу если есть
+schtasks /Query /TN "%TASK_NAME%" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo   [i] Удаление старой задачи автозапуска...
+    schtasks /Delete /TN "%TASK_NAME%" /F >nul 2>&1
+)
+
+:: Читаем ARGS из конфига
+set "WINWS_ARGS="
+for /f "tokens=1,* delims==" %%a in ('type "%CONFIG_FILE%" 2^>nul ^| findstr "^ARGS="') do (
+    set "WINWS_ARGS=%%b"
+)
+
+if "!WINWS_ARGS!"=="" (
+    set "WINWS_ARGS=--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=2 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6"
+)
+
+:: Создаём задачу в планировщике (запуск при входе, от SYSTEM)
+schtasks /Create /TN "%TASK_NAME%" /TR "\"!WINWS_EXE!\" !WINWS_ARGS!" /SC ONLOGON /RL HIGHEST /RU SYSTEM /F >nul 2>&1
+if %errorlevel% equ 0 (
+    echo   [OK] Задача автозапуска создана: %TASK_NAME%
+) else (
+    echo   [!] Не удалось создать задачу автозапуска
+    echo       Вы можете запускать winws вручную через service.bat
+)
+
+:: Запускаем winws прямо сейчас
+echo.
+echo   [i] Запуск winws.exe...
+
+:: Убиваем старый процесс если есть
+taskkill /F /IM winws.exe >nul 2>&1
+
+:: Запускаем задачу
+schtasks /Run /TN "%TASK_NAME%" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo   [OK] winws.exe запущен
+) else (
+    echo   [!] Не удалось запустить через планировщик, запускаем напрямую...
+    start "" /B "!WINWS_EXE!" !WINWS_ARGS!
+    echo   [OK] winws.exe запущен
+)
+
+:: Проверяем что процесс работает
+timeout /t 2 /nobreak >nul
+tasklist /FI "IMAGENAME eq winws.exe" 2>nul | findstr /I "winws.exe" >nul
+if %errorlevel% equ 0 (
+    echo   [OK] winws.exe процесс активен
+) else (
+    echo   [!] winws.exe не обнаружен. Проверьте логи.
+)
+
+echo.
+
+:: ═══════════════════════════════════════════════════════════════════════════════
+::  ФИНАЛЬНАЯ СВОДКА
+:: ═══════════════════════════════════════════════════════════════════════════════
+
+echo.
+echo   ╔══════════════════════════════════════════════════════════╗
+echo   ║                                                        ║
+echo   ║       ✅  УСТАНОВКА ЗАВЕРШЕНА УСПЕШНО!                 ║
+echo   ║                                                        ║
+echo   ╚══════════════════════════════════════════════════════════╝
+echo.
+echo   ┌──────────────────────────────────────────────────────┐
+echo   │                                                      │
+echo   │  Zapret (winws.exe) работает на этом компьютере      │
+echo   │  Обход DPI активен для всех подключений              │
+echo   │                                                      │
+echo   │  winws.exe будет запускаться автоматически            │
+echo   │  при каждом входе в Windows                          │
+echo   │                                                      │
+echo   └──────────────────────────────────────────────────────┘
+echo.
+echo   Полезные команды:
+echo     service.bat start      — запустить winws
+echo     service.bat stop       — остановить winws
+echo     service.bat status     — проверить статус
+echo     strategies.bat         — сменить стратегию DPI bypass
+echo     uninstall.bat          — полное удаление
+echo.
+echo   Папка установки: %ZAPRET_DIR%
+echo   Конфигурация:    %CONFIG_FILE%
+echo.
+
+pause
+exit /b 0
