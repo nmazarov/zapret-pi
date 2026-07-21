@@ -23,10 +23,8 @@ if %errorlevel% neq 0 (
 
 :: ─── Определяем winws.exe ──────────────────────────────────────────────────
 set "WINWS_EXE="
-if exist "%ZAPRET_DIR%\binaries\win64\winws.exe" (
-    set "WINWS_EXE=%ZAPRET_DIR%\binaries\win64\winws.exe"
-) else if exist "%ZAPRET_DIR%\binaries\win32\winws.exe" (
-    set "WINWS_EXE=%ZAPRET_DIR%\binaries\win32\winws.exe"
+if exist "%ZAPRET_DIR%\bin\winws.exe" (
+    set "WINWS_EXE=%ZAPRET_DIR%\bin\winws.exe"
 )
 
 if "%WINWS_EXE%"=="" (

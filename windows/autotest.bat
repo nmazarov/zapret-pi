@@ -26,8 +26,7 @@ set "SCRIPT_DIR=%~dp0"
 set "ZAPRET_DIR=%~dp0zapret"
 set "CONFIG_FILE=%ZAPRET_DIR%\zapret-winws.ini"
 set "WINWS_EXE="
-if exist "%ZAPRET_DIR%\binaries\win64\winws.exe" set "WINWS_EXE=%ZAPRET_DIR%\binaries\win64\winws.exe"
-if exist "%ZAPRET_DIR%\binaries\win32\winws.exe" set "WINWS_EXE=%ZAPRET_DIR%\binaries\win32\winws.exe"
+if exist "%ZAPRET_DIR%\bin\winws.exe" set "WINWS_EXE=%ZAPRET_DIR%\bin\winws.exe"
 
 cls
 echo.
