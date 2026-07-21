@@ -68,15 +68,8 @@ if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
     exit /b 1
 )
 
-:: Проверка git
-where git >nul 2>&1
-if %errorlevel% neq 0 (
-    echo   [i] Git не найден. Попробуем скачать zapret через curl...
-    set "USE_GIT=0"
-) else (
-    echo   [OK] Git найден
-    set "USE_GIT=1"
-)
+:: Мы больше не используем git, так как он может зависать при DPI блокировках
+set "USE_GIT=0"
 
 :: Проверка curl (встроен в Windows 10+)
 where curl >nul 2>&1
@@ -101,48 +94,30 @@ echo.
 echo   ━━━ Шаг 2/5 — Загрузка Zapret ━━━
 echo.
 
-if exist "%ZAPRET_DIR%\.git" (
-    echo   [i] Проверка актуальной версии Zapret на GitHub...
-    pushd "%ZAPRET_DIR%"
-    git pull --quiet 2>nul
-    popd
-    echo   [OK] Zapret обновлён
-) else (
-    if exist "%ZAPRET_DIR%" (
-        echo   [i] Очистка старой установки...
-        rmdir /s /q "%ZAPRET_DIR%" 2>nul
-    )
-
-    if "!USE_GIT!"=="1" (
-        echo   [i] Клонирование zapret...
-        git clone --quiet --depth=1 "%ZAPRET_REPO%" "%ZAPRET_DIR%"
-        if !errorlevel! neq 0 (
-            echo   [i] Ошибка git clone. Пробуем скачать через curl...
-            set "USE_GIT=0"
-        )
-    )
-
-    if "!USE_GIT!"=="0" (
-        echo   [i] Скачивание zapret через curl...
-        mkdir "%ZAPRET_DIR%" 2>nul
-        curl -sL "https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
-        if !errorlevel! neq 0 (
-            echo   [i] Ошибка curl. Пробуем скачать через зеркало ^(ghproxy^)...
-            curl -sL "https://mirror.ghproxy.com/https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
-        )
-        if !errorlevel! neq 0 (
-            echo   [ОШИБКА] Не удалось скачать zapret даже через зеркало. Проверьте интернет.
-            pause
-            exit /b 1
-        )
-        echo   [i] Распаковка...
-        powershell -Command "Expand-Archive -Path '%ZAPRET_DIR%\zapret.zip' -DestinationPath '%ZAPRET_DIR%\temp' -Force"
-        xcopy "%ZAPRET_DIR%\temp\zapret-discord-youtube-main\*" "%ZAPRET_DIR%\" /s /e /q /y >nul
-        rmdir /s /q "%ZAPRET_DIR%\temp" 2>nul
-        del "%ZAPRET_DIR%\zapret.zip" 2>nul
-    )
-    echo   [OK] Zapret загружен
+if exist "%ZAPRET_DIR%" (
+    echo   [i] Очистка старой установки...
+    rmdir /s /q "%ZAPRET_DIR%" 2>nul
 )
+
+echo   [i] Скачивание zapret через curl...
+mkdir "%ZAPRET_DIR%" 2>nul
+curl --connect-timeout 10 --max-time 60 -sL "https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
+if !errorlevel! neq 0 (
+    echo   [i] Ошибка curl. Пробуем скачать через зеркало ^(ghproxy^)...
+    curl --connect-timeout 10 --max-time 60 -sL "https://mirror.ghproxy.com/https://github.com/Flowseal/zapret-discord-youtube/archive/refs/heads/main.zip" -o "%ZAPRET_DIR%\zapret.zip"
+)
+if !errorlevel! neq 0 (
+    echo   [ОШИБКА] Не удалось скачать zapret даже через зеркало. Проверьте интернет.
+    pause
+    exit /b 1
+)
+echo   [i] Распаковка...
+powershell -Command "Expand-Archive -Path '%ZAPRET_DIR%\zapret.zip' -DestinationPath '%ZAPRET_DIR%\temp' -Force"
+xcopy "%ZAPRET_DIR%\temp\zapret-discord-youtube-main\*" "%ZAPRET_DIR%\" /s /e /q /y >nul
+rmdir /s /q "%ZAPRET_DIR%\temp" 2>nul
+del "%ZAPRET_DIR%\zapret.zip" 2>nul
+
+echo   [OK] Zapret загружен
 
 echo.
 
