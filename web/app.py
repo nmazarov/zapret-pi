@@ -512,8 +512,23 @@ def api_test_targets():
         "psn": "https://store.playstation.com"
     }
     results = {}
+    
+    # Check if xray/vless is running locally
+    _, xray_out, _ = _run("systemctl is-active xray", timeout=3)
+    use_proxy = "socks5h://127.0.0.1:10808" if xray_out == "active" else ""
+
     for name, url in targets.items():
-        rc, out, _ = _run(f"curl -sL -I --connect-timeout 4 -m 5 {url}", timeout=6)
+        if use_proxy:
+            cmd = f"curl -4 -sL -I -x {use_proxy} --connect-timeout 4 -m 5 {url}"
+        else:
+            cmd = f"curl -4 -sL -I --connect-timeout 4 -m 5 {url}"
+            
+        rc, out, _ = _run(cmd, timeout=6)
+        
+        # If direct failed and proxy is available, try proxy fallback
+        if rc != 0 and not use_proxy:
+            rc, out, _ = _run(f"curl -4 -sL -I -x socks5h://127.0.0.1:10808 --connect-timeout 4 -m 5 {url}", timeout=6)
+            
         results[name] = (rc == 0 and ("HTTP/1." in out or "HTTP/2" in out or "HTTP/3" in out))
     
     # Calculate simple ping to 8.8.8.8
