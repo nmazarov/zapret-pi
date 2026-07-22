@@ -73,7 +73,7 @@ if "%choice%"=="6" (
         goto :show_menu
     )
 )
-if "%choice%"=="0" (
+if "%choice%"=="7" (
     exit /b 0
 )
 

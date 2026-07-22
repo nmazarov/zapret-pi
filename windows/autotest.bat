@@ -35,7 +35,7 @@ echo   !CYAN!║          АВТОМАТИЧЕСКИЙ ПОДБОР СТРАТЕ
 echo   !CYAN!╚══════════════════════════════════════════════════════════╝!RESET!
 echo.
 echo   !YELLOW![i] Скрипт по очереди проверит все доступные стратегии.!RESET!
-echo   !YELLOW![i] Тестируемые сайты: Discord, YouTube, X (Twitter), Gemini, SoundCloud!RESET!
+echo   !YELLOW![i] Тестируемые сайты: Discord, YouTube!RESET!
 echo.
 
 :: Загружаем стратегии
@@ -47,8 +47,8 @@ taskkill /IM winws.exe /F >nul 2>&1
 echo   !GREEN![OK] Фоновую службу временно остановили для тестов.!RESET!
 echo.
 
-:: Список тестовых URL
-set "TEST_URLS=https://discord.com https://x.com https://rr1---sn-axq7sn7l.googlevideo.com https://gemini.google.com https://soundcloud.com"
+:: Список тестовых URL (проверяем только целевые сервисы)
+set "TEST_URLS=https://discord.com https://rr1---sn-axq7sn7l.googlevideo.com"
 set "TOTAL_STRATS=6"
 set "SUCCESS_STRATEGY="
 
@@ -105,7 +105,13 @@ if "!SUCCESS_STRATEGY!"=="" (
 :: Применяем найденную стратегию
 echo.
 echo   !YELLOW![i] Применение рабочей стратегии: !S%SUCCESS_STRATEGY%_TITLE!!RESET!
-echo winws_args="!S%SUCCESS_STRATEGY%_ARGS!"> "%CONFIG_FILE%"
+(
+    echo # Конфигурация Zapret для Windows
+    echo # Обновлено автотестом: %date% %time%
+    echo #
+    echo STRATEGY=!S%SUCCESS_STRATEGY%_NAME!
+    echo ARGS=!S%SUCCESS_STRATEGY%_ARGS!
+) > "%CONFIG_FILE%"
 
 :: Установка и запуск службы
 echo   !YELLOW![i] Перезапуск службы...!RESET!

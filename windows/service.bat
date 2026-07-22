@@ -39,9 +39,12 @@ for /f "tokens=1,* delims==" %%a in ('type "%CONFIG_FILE%" 2^>nul ^| findstr "^A
     set "WINWS_ARGS=%%b"
 )
 
-if "%WINWS_ARGS%"=="" (
+if "!WINWS_ARGS!" neq "" (
+    set "WINWS_ARGS=!WINWS_ARGS:%%ZAPRET_DIR%%=%ZAPRET_DIR%!"
+) else (
     set "WINWS_ARGS=--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=2 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6"
 )
+
 
 :: ─── Разбор команды ─────────────────────────────────────────────────────────
 if "%~1"=="" goto :show_menu
