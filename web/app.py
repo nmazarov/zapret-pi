@@ -467,12 +467,12 @@ def api_test_targets():
         "discord": "https://discord.com",
         "youtube": "https://www.youtube.com",
         "ea_sports": "https://accounts.ea.com",
-        "psn": "https://auth.api.sonycontain.com"
+        "psn": "https://store.playstation.com"
     }
     results = {}
     for name, url in targets.items():
-        rc, out, _ = _run(f"curl -s -I --connect-timeout 3 -m 3 {url}", timeout=5)
-        results[name] = (rc == 0 and "HTTP/" in out)
+        rc, out, _ = _run(f"curl -sL -I --connect-timeout 4 -m 5 {url}", timeout=6)
+        results[name] = (rc == 0 and ("HTTP/1." in out or "HTTP/2" in out or "HTTP/3" in out))
     
     # Calculate simple ping to 8.8.8.8
     rc_ping, out_ping, _ = _run("ping -c 1 -w 2 8.8.8.8 | awk -F'/' 'END{print $5}'", timeout=3)
