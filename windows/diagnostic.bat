@@ -57,8 +57,9 @@ if "!WINWS_ARGS!"=="" (
 )
 
 echo [3] Аргументы winws:
-echo   !WINWS_ARGS!
-echo.
+setlocal DisableDelayedExpansion
+echo   %WINWS_ARGS%
+endlocal
 
 :: 4. Убиваем старый процесс
 echo [4] Остановка старого winws.exe...
