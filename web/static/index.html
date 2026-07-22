@@ -42,10 +42,10 @@
 
     .container {
       width: 100%;
-      max-width: 1100px;
+      max-width: 1200px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
     }
 
     /* Header */
@@ -53,7 +53,7 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(12px);
-      padding: 20px 24px;
+      padding: 18px 24px;
       border-radius: var(--radius);
       display: flex;
       justify-content: space-between;
@@ -70,19 +70,19 @@
     }
 
     .logo-icon {
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       background: linear-gradient(135deg, #10b981, #3b82f6);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 22px;
       box-shadow: 0 0 20px var(--primary-glow);
     }
 
     .title {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 800;
       background: linear-gradient(to right, #ffffff, #cbd5e1);
       -webkit-background-clip: text;
@@ -100,7 +100,7 @@
       gap: 8px;
       padding: 8px 16px;
       border-radius: 9999px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       background: rgba(16, 185, 129, 0.15);
       color: var(--primary);
@@ -114,11 +114,11 @@
     }
 
     .dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: currentColor;
-      box-shadow: 0 0 10px currentColor;
+      box-shadow: 0 0 8px currentColor;
       animation: pulse 2s infinite;
     }
 
@@ -127,29 +127,39 @@
       50% { opacity: 0.5; transform: scale(0.85); }
     }
 
-    /* Grid Layout */
-    .grid {
+    /* Grid System */
+    .grid-top {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
+    }
+
+    .grid-bottom {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-top { grid-template-columns: 1fr; }
+      .grid-bottom { grid-template-columns: 1fr; }
     }
 
     .card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(12px);
-      padding: 24px;
+      padding: 22px;
       border-radius: var(--radius);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
-    }
-
-    .card:hover {
-      border-color: rgba(255, 255, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
     }
 
     .card-title {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       margin-bottom: 16px;
       display: flex;
@@ -158,73 +168,82 @@
       gap: 8px;
     }
 
-    /* Services Live Test Grid */
+    /* Services Grid */
     .services-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
       margin-bottom: 16px;
     }
 
     .service-item {
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 14px;
-      border-radius: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
     }
 
     .service-name {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .badge-ok {
       background: rgba(16, 185, 129, 0.2);
       color: var(--primary);
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 6px;
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .badge-fail {
       background: rgba(239, 68, 68, 0.2);
       color: var(--danger);
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 6px;
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .badge-wait {
       background: rgba(148, 163, 184, 0.2);
       color: var(--text-muted);
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 6px;
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* Buttons */
     .btn {
       width: 100%;
-      padding: 12px 18px;
-      border-radius: 12px;
-      font-size: 0.95rem;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
       font-weight: 600;
       border: none;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     .btn-primary {
@@ -242,48 +261,51 @@
     .btn-secondary:hover { background: rgba(71, 85, 105, 0.9); }
 
     .btn-danger {
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--danger);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
     }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.4); }
 
-    .btn-group {
-      display: flex;
-      gap: 10px;
+    /* Equal width 3-button row */
+    .btn-row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 100%;
     }
 
-    /* Network Info Box for PS5 */
+    /* Info rows */
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 14px;
+      padding: 8px 12px;
       background: rgba(15, 23, 42, 0.5);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      font-size: 0.9rem;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
     }
 
     .info-label { color: var(--text-muted); }
     .info-val { font-weight: 700; font-family: monospace; color: #38bdf8; }
 
-    /* Strategy Selector */
+    /* Select */
     select {
       width: 100%;
-      padding: 12px;
+      padding: 10px 12px;
       border-radius: 10px;
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.9);
       color: white;
       border: 1px solid var(--card-border);
-      font-size: 0.95rem;
-      margin-bottom: 14px;
+      font-size: 0.88rem;
+      margin-bottom: 12px;
       outline: none;
     }
 
-    /* System Stats */
+    /* Stats */
     .stat-bar {
-      height: 8px;
+      height: 6px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 4px;
       overflow: hidden;
@@ -296,15 +318,15 @@
       transition: width 0.5s ease;
     }
 
-    /* Terminal Logs */
+    /* Log Box */
     .log-box {
       background: #050811;
       border: 1px solid var(--card-border);
-      padding: 14px;
-      border-radius: 12px;
+      padding: 12px;
+      border-radius: 10px;
       font-family: monospace;
-      font-size: 0.82rem;
-      max-height: 200px;
+      font-size: 0.78rem;
+      max-height: 180px;
       overflow-y: auto;
       color: #34d399;
       white-space: pre-wrap;
@@ -312,9 +334,9 @@
 
     footer {
       text-align: center;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
-      margin-top: 10px;
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -331,41 +353,43 @@
           <div class="subtitle">Управление шлюзом DPI Bypass для PS5 & Сети</div>
         </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
         <div id="serviceStatusBadge" class="status-badge">
           <span class="dot"></span>
           <span id="serviceStatusText">Проверка...</span>
         </div>
-        <button class="btn btn-secondary" onclick="fetchStatus()" style="width: auto; padding: 8px 14px;">↻ Обновить</button>
+        <button class="btn btn-secondary" onclick="fetchStatus()" style="width: auto; padding: 7px 12px; font-size: 0.82rem;">↻ Обновить</button>
       </div>
     </header>
 
-    <!-- Main Grid -->
-    <div class="grid">
+    <!-- Top Grid: 3 Equal Cards -->
+    <div class="grid-top">
 
-      <!-- Card 1: Express Test & Status -->
+      <!-- Card 1: Express Test -->
       <div class="card">
-        <div class="card-title">
-          <span>⚡ Доступ к Сервисам (Экспресс-тест)</span>
-          <span id="pingBadge" class="badge-ok" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">Пинг: -- ms</span>
-        </div>
+        <div>
+          <div class="card-title">
+            <span>⚡ Доступ к Сервисам</span>
+            <span id="pingBadge" class="badge-ok" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">Пинг: -- ms</span>
+          </div>
 
-        <div class="services-grid">
-          <div class="service-item">
-            <span class="service-name">🎮 EA Sports</span>
-            <span id="targetEA" class="badge-wait">--</span>
-          </div>
-          <div class="service-item">
-            <span class="service-name">💬 Discord</span>
-            <span id="targetDiscord" class="badge-wait">--</span>
-          </div>
-          <div class="service-item">
-            <span class="service-name">📺 YouTube</span>
-            <span id="targetYouTube" class="badge-wait">--</span>
-          </div>
-          <div class="service-item">
-            <span class="service-name">🌐 PSN Network</span>
-            <span id="targetPSN" class="badge-wait">--</span>
+          <div class="services-grid">
+            <div class="service-item">
+              <span class="service-name">🎮 EA Sports</span>
+              <span id="targetEA" class="badge-wait">--</span>
+            </div>
+            <div class="service-item">
+              <span class="service-name">💬 Discord</span>
+              <span id="targetDiscord" class="badge-wait">--</span>
+            </div>
+            <div class="service-item">
+              <span class="service-name">📺 YouTube</span>
+              <span id="targetYouTube" class="badge-wait">--</span>
+            </div>
+            <div class="service-item">
+              <span class="service-name">🌐 PSN Network</span>
+              <span id="targetPSN" class="badge-wait">--</span>
+            </div>
           </div>
         </div>
 
@@ -374,66 +398,70 @@
 
       <!-- Card 2: PS5 Connection Settings -->
       <div class="card">
-        <div class="card-title">
-          <span>🎮 Настройки для PS5</span>
-          <span style="font-size: 0.8rem; color: var(--text-muted);">Шлюз & DNS</span>
+        <div>
+          <div class="card-title">
+            <span>🎮 Настройки для PS5</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Шлюз & DNS</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">IP Raspberry Pi:</span>
+            <span class="info-val" id="rpiIpVal">192.168.1.118</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Шлюз (Gateway):</span>
+            <span class="info-val" id="rpiGwVal">192.168.1.118</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Основной DNS:</span>
+            <span class="info-val">192.168.1.118</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Дополнительный DNS:</span>
+            <span class="info-val">8.8.8.8</span>
+          </div>
         </div>
 
-        <div class="info-row">
-          <span class="info-label">IP Raspberry Pi:</span>
-          <span class="info-val" id="rpiIpVal">192.168.1.118</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Шлюз по умолчанию (Gateway):</span>
-          <span class="info-val" id="rpiGwVal">192.168.1.118</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Основной DNS (Primary DNS):</span>
-          <span class="info-val">192.168.1.118</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Дополнительный DNS:</span>
-          <span class="info-val">8.8.8.8</span>
-        </div>
-
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">
-          💡 Укажите эти параметры в меню <b>PS5 ➔ Настройки ➔ Сеть ➔ Дополнительные настройки ➔ IP: Вручную</b>.
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">
+          💡 <b>PS5 ➔ Настройки ➔ Сеть ➔ Дополнительные настройки ➔ IP: Вручную</b>
         </div>
       </div>
 
-      <!-- Card 3: Strategy Selection -->
+      <!-- Card 3: Strategy Selector -->
       <div class="card">
-        <div class="card-title">
-          <span>⚙️ Выбор Стратегии DPI</span>
+        <div>
+          <div class="card-title">
+            <span>⚙️ Стратегия DPI</span>
+          </div>
+
+          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Выберите пресет:</label>
+          <select id="strategySelect">
+            <option value="flowseal">Flowseal ALT (Рекомендуется для EA + Discord + YT)</option>
+            <option value="universal_md5sig">Universal MD5Sig (Стандартная)</option>
+            <option value="fakeddisorder">Fake + Disorder (ТСПУ v2)</option>
+            <option value="multisplit_seqovl">MultiSplit + SeqOvl (Максимальная)</option>
+          </select>
         </div>
 
-        <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Выберите оптимальный пресет:</label>
-        <select id="strategySelect">
-          <option value="flowseal">Flowseal ALT (Рекомендуется для EA + Discord + YT)</option>
-          <option value="universal_md5sig">Universal MD5Sig (Стандартная)</option>
-          <option value="fakeddisorder">Fake + Disorder (ТСПУ v2)</option>
-          <option value="multisplit_seqovl">MultiSplit + SeqOvl (Максимальная)</option>
-        </select>
-
-        <div class="btn-group">
-          <button class="btn btn-primary" onclick="applySelectedStrategy()">Применить стратегию</button>
-        </div>
+        <button class="btn btn-primary" onclick="applySelectedStrategy()">Применить стратегию</button>
       </div>
 
-      <!-- Card 4: Service Controls -->
+    </div>
+
+    <!-- Bottom Grid: 2 Equal Cards -->
+    <div class="grid-bottom">
+
+      <!-- Card 4: Service Controls (Perfectly Aligned 3-Button Grid) -->
       <div class="card">
         <div class="card-title">
           <span>🛡️ Управление Службой</span>
+          <span id="controlStatusLabel" style="font-size: 0.8rem; font-weight: 700; color: #10b981;">Активен</span>
         </div>
 
-        <div class="btn-group" style="margin-bottom: 12px;">
+        <div class="btn-row-3">
           <button class="btn btn-primary" onclick="controlService('start')">▶ Запустить</button>
-          <button class="btn btn-secondary" onclick="controlService('restart')">↻ Перезапустить</button>
+          <button class="btn btn-secondary" onclick="controlService('restart')">↻ Перезапуск</button>
           <button class="btn btn-danger" onclick="controlService('stop')">⏹ Остановить</button>
-        </div>
-
-        <div style="font-size: 0.85rem; color: var(--text-muted);">
-          Текущий статус: <b id="controlStatusLabel" style="color: white;">--</b>
         </div>
       </div>
 
@@ -443,32 +471,29 @@
           <span>📊 Ресурсы Raspberry Pi</span>
         </div>
 
-        <div style="margin-bottom: 12px;">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
             <span class="info-label">Загрузка ОЗУ:</span>
             <span id="ramText" style="font-weight: 600;">-- %</span>
           </div>
           <div class="stat-bar"><div id="ramFill" class="stat-fill"></div></div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-top: 8px;">
           <span class="info-label">Температура ЦП:</span>
           <span id="tempText" style="font-weight: 700; color: #f43f5e;">-- °C</span>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 6px;">
-          <span class="info-label">Время работы (Uptime):</span>
+          <span class="info-label">Uptime:</span>
           <span id="uptimeText" style="font-weight: 600; color: #cbd5e1;">--</span>
         </div>
       </div>
 
     </div>
 
-    <!-- Live Logs Section -->
+    <!-- Live Logs -->
     <div class="card">
       <div class="card-title">
         <span>📜 Логи Системы (zapret)</span>
-        <button class="btn btn-secondary" onclick="fetchLogs()" style="width: auto; padding: 6px 12px; font-size: 0.8rem;">Обновить логи</button>
+        <button class="btn btn-secondary" onclick="fetchLogs()" style="width: auto; padding: 5px 10px; font-size: 0.78rem;">Обновить логи</button>
       </div>
       <div id="logBox" class="log-box">Загрузка логов...</div>
     </div>
@@ -485,7 +510,7 @@
         const res = await fetch('/api/status');
         const data = await res.json();
 
-        // Update Status Badge
+        // Status Badge
         const badge = document.getElementById('serviceStatusBadge');
         const badgeText = document.getElementById('serviceStatusText');
         const controlLabel = document.getElementById('controlStatusLabel');
@@ -502,7 +527,7 @@
           controlLabel.style.color = '#ef4444';
         }
 
-        // Network IPs
+        // IPs
         if (data.local_ip) {
           document.getElementById('rpiIpVal').innerText = data.local_ip;
           document.getElementById('rpiGwVal').innerText = data.local_ip;
@@ -595,7 +620,7 @@
         alert(data.message || "Стратегия успешно применена!");
         fetchStatus();
       } catch (err) {
-        alert("Ошибка привязке стратегии: " + err);
+        alert("Ошибка привязки стратегии: " + err);
       }
     }
 
