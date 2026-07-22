@@ -469,7 +469,7 @@
             <div id="modeOptVless" class="mode-option" onclick="switchMode('vless')">
               <div>
                 <div class="mode-title">🚀 Только SmartDNS + VLESS</div>
-                <div class="mode-desc">На консоли PS5 меняется <b>ТОЛЬКО DNS (192.168.1.118)</b></div>
+                <div class="mode-desc">На консоли PS5 меняется <b>ТОЛЬКО DNS (<span id="rpiDnsModeVal">--</span>)</b></div>
               </div>
               <span>›</span>
             </div>
@@ -499,11 +499,11 @@
 
           <div class="info-row">
             <span class="info-label">IP Raspberry Pi:</span>
-            <span class="info-val" id="rpiIpVal">192.168.1.118</span>
+            <span class="info-val" id="rpiIpVal">--</span>
           </div>
           <div class="info-row">
             <span class="info-label">Основной DNS (Primary):</span>
-            <span class="info-val">192.168.1.118</span>
+            <span class="info-val" id="rpiDnsVal">--</span>
           </div>
           <div class="info-row">
             <span class="info-label">Дополнительный DNS:</span>
@@ -511,7 +511,7 @@
           </div>
           <div class="info-row">
             <span class="info-label">Шлюз (для Zapret):</span>
-            <span class="info-val" id="rpiGwVal">192.168.1.118</span>
+            <span class="info-val" id="rpiGwVal">--</span>
           </div>
         </div>
       </div>
@@ -596,10 +596,13 @@
           badgeText.innerText = 'Остановлен';
         }
 
-        // IPs
-        if (data.local_ip) {
-          document.getElementById('rpiIpVal').innerText = data.local_ip;
-          document.getElementById('rpiGwVal').innerText = data.local_ip;
+        // IPs (dynamically bind all IP elements to real server IP)
+        const currentIp = data.local_ip || window.location.hostname;
+        if (currentIp) {
+          ['rpiIpVal', 'rpiDnsVal', 'rpiGwVal', 'rpiDnsModeVal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = currentIp;
+          });
         }
 
         // Resources
@@ -741,11 +744,16 @@
       }
     }
 
-    // Init
-    fetchStatus();
-    runLiveTest();
-    fetchLogs();
-    setInterval(fetchStatus, 10000);
+    window.addEventListener('DOMContentLoaded', () => {
+      const hostIp = window.location.hostname || '192.168.0.178';
+      ['rpiIpVal', 'rpiDnsVal', 'rpiGwVal', 'rpiDnsModeVal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.innerText === '--') el.innerText = hostIp;
+      });
+      fetchStatus();
+      fetchLogs();
+      setInterval(fetchStatus, 5000);
+    });
   </script>
 
 </body>
