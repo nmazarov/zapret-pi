@@ -1,0 +1,9 @@
+MODE=nfqws
+MODE_FILTER=none
+IFACE_WAN=eth0
+TPWS_ENABLE=0
+NFQWS_ENABLE=1
+NFQWS_PORTS_TCP="80,443"
+NFQWS_PORTS_UDP="443"
+NFQWS_QUEUE_NUM=200
+NFQWS_OPT="--filter-tcp=80,443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00"

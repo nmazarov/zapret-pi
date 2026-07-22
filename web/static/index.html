@@ -238,6 +238,40 @@
       flex-shrink: 0;
     }
 
+    /* Mode Selector Buttons */
+    .mode-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .mode-option {
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .mode-option:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .mode-option.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: #10b981;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .mode-title { font-size: 0.92rem; font-weight: 700; color: white; }
+    .mode-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
     /* Buttons */
     .btn {
       width: 100%;
@@ -405,21 +439,57 @@
         <button class="btn btn-primary" onclick="runLiveTest()">▶ Запустить экспресс-тест доступа</button>
       </div>
 
-      <!-- Card 2: PS5 Connection Settings -->
+      <!-- Card 2: Mode Selector Card -->
+      <div class="card">
+        <div>
+          <div class="card-title">
+            <span>🚀 Режим Работы Шлюза</span>
+            <span id="currentModeBadge" class="badge-ok" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">ГИБРИДНЫЙ</span>
+          </div>
+
+          <div class="mode-btn-group">
+            <div id="modeOptHybrid" class="mode-option active" onclick="switchMode('hybrid')">
+              <div>
+                <div class="mode-title">🛡️ Гибридный (Рекомендуется)</div>
+                <div class="mode-desc">Zapret DPI Bypass + SmartDNS VLESS (Нидерланды)</div>
+              </div>
+              <span style="font-size: 1.1rem;">✔</span>
+            </div>
+
+            <div id="modeOptVless" class="mode-option" onclick="switchMode('vless')">
+              <div>
+                <div class="mode-title">🚀 Только SmartDNS + VLESS</div>
+                <div class="mode-desc">На консоли PS5 меняется <b>ТОЛЬКО DNS (192.168.1.118)</b></div>
+              </div>
+              <span>›</span>
+            </div>
+
+            <div id="modeOptZapret" class="mode-option" onclick="switchMode('zapret')">
+              <div>
+                <div class="mode-title">⚡ Только Zapret (DPI Bypass)</div>
+                <div class="mode-desc">Локальная подмена пакетов (Шлюз + DNS)</div>
+              </div>
+              <span>›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Grid: 3 Equal Cards -->
+    <div class="grid-bottom">
+
+      <!-- Card 3: PS5 Connection Settings -->
       <div class="card">
         <div>
           <div class="card-title">
             <span>🎮 Настройки для PS5</span>
-            <span style="font-size: 0.78rem; color: var(--text-muted);">Шлюз & DNS</span>
           </div>
 
           <div class="info-row">
             <span class="info-label">IP Raspberry Pi:</span>
             <span class="info-val" id="rpiIpVal">192.168.1.118</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Шлюз (Gateway):</span>
-            <span class="info-val" id="rpiGwVal">192.168.1.118</span>
           </div>
           <div class="info-row">
             <span class="info-label">Основной DNS (Primary):</span>
@@ -429,55 +499,30 @@
             <span class="info-label">Дополнительный DNS:</span>
             <span class="info-val">8.8.8.8</span>
           </div>
-        </div>
-
-        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;">
-          💡 <b>PS5 ➔ Настройки ➔ Сеть ➔ Дополнительные настройки ➔ IP: Вручную</b>
+          <div class="info-row">
+            <span class="info-label">Шлюз (для Zapret):</span>
+            <span class="info-val" id="rpiGwVal">192.168.1.118</span>
+          </div>
         </div>
       </div>
 
-    </div>
-
-    <!-- Bottom Grid: 3 Equal Cards -->
-    <div class="grid-bottom">
-
-      <!-- Card 3: Strategy Selection -->
+      <!-- Card 4: Strategy Selection -->
       <div class="card">
         <div>
           <div class="card-title">
-            <span>⚙️ Выбор Стратегии DPI</span>
+            <span>⚙️ Стратегия DPI</span>
           </div>
 
           <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Выберите проверенный пресет:</label>
           <select id="strategySelect">
-            <option value="flowseal_alt">1. Flowseal ALT (Рекомендуется для EA + Discord + YT)</option>
-            <option value="multisplit_seqovl">2. MultiSplit + SeqOvl (Продвинутый ТСПУ Обход)</option>
-            <option value="fakeddisorder">3. Fake + Disorder (Ростелеком / МТС / Билайн)</option>
+            <option value="flowseal_alt">1. Flowseal ALT (EA + Discord + YT)</option>
+            <option value="multisplit_seqovl">2. MultiSplit + SeqOvl (ТСПУ Обход)</option>
+            <option value="fakeddisorder">3. Fake + Disorder (Операторы РФ)</option>
             <option value="universal_md5sig">4. Universal MD5Sig (Стабильная)</option>
           </select>
         </div>
 
         <button class="btn btn-primary" onclick="applySelectedStrategy()">Применить стратегию</button>
-      </div>
-
-      <!-- Card 4: Service Controls -->
-      <div class="card">
-        <div>
-          <div class="card-title">
-            <span>🛡️ Управление Службой</span>
-            <span id="controlStatusLabel" style="font-size: 0.82rem; font-weight: 700; color: #10b981;">Активен</span>
-          </div>
-
-          <div class="btn-row-3" style="margin-top: 10px;">
-            <button class="btn btn-primary" onclick="controlService('start')">▶ Старт</button>
-            <button class="btn btn-secondary" onclick="controlService('restart')">↻ Рестарт</button>
-            <button class="btn btn-danger" onclick="controlService('stop')">⏹ Стоп</button>
-          </div>
-        </div>
-
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 12px;">
-          Служба `zapret.service` работает на уровне ядра Linux.
-        </div>
       </div>
 
       <!-- Card 5: System Resources -->
@@ -511,7 +556,7 @@
     <!-- Live Logs -->
     <div class="card">
       <div class="card-title">
-        <span>📜 Логи Системы (zapret)</span>
+        <span>📜 Логи Системы (zapret & xray)</span>
         <button class="btn btn-secondary" onclick="fetchLogs()" style="width: auto; padding: 6px 12px; font-size: 0.8rem;">Обновить логи</button>
       </div>
       <div id="logBox" class="log-box">Загрузка логов...</div>
@@ -532,18 +577,13 @@
         // Status Badge
         const badge = document.getElementById('serviceStatusBadge');
         const badgeText = document.getElementById('serviceStatusText');
-        const controlLabel = document.getElementById('controlStatusLabel');
 
         if (data.status === 'active') {
           badge.className = 'status-badge';
           badgeText.innerText = 'Запущен & Работает';
-          controlLabel.innerText = 'Активен (running)';
-          controlLabel.style.color = '#10b981';
         } else {
           badge.className = 'status-badge stopped';
           badgeText.innerText = 'Остановлен';
-          controlLabel.innerText = 'Остановлен';
-          controlLabel.style.color = '#ef4444';
         }
 
         // IPs
@@ -564,8 +604,55 @@
           document.getElementById('uptimeText').innerText = data.uptime;
         }
 
+        fetchMode();
+
       } catch (err) {
         console.error("Failed to fetch status:", err);
+      }
+    }
+
+    async function fetchMode() {
+      try {
+        const res = await fetch('/api/mode');
+        const data = await res.json();
+        
+        const badge = document.getElementById('currentModeBadge');
+        const opts = ['OptHybrid', 'OptVless', 'OptZapret'];
+        opts.forEach(o => document.getElementById('mode' + o).className = 'mode-option');
+
+        if (data.mode === 'vless') {
+          badge.innerText = 'SMARTDNS VLESS';
+          badge.style.color = '#3b82f6';
+          badge.style.background = 'rgba(59, 130, 246, 0.2)';
+          document.getElementById('modeOptVless').className = 'mode-option active';
+        } else if (data.mode === 'zapret') {
+          badge.innerText = 'ТОЛЬКО ZAPRET';
+          badge.style.color = '#f59e0b';
+          badge.style.background = 'rgba(245, 158, 11, 0.2)';
+          document.getElementById('modeOptZapret').className = 'mode-option active';
+        } else {
+          badge.innerText = 'ГИБРИДНЫЙ';
+          badge.style.color = '#10b981';
+          badge.style.background = 'rgba(16, 185, 129, 0.2)';
+          document.getElementById('modeOptHybrid').className = 'mode-option active';
+        }
+      } catch (err) {
+        console.error("Failed to fetch mode:", err);
+      }
+    }
+
+    async function switchMode(mode) {
+      try {
+        const res = await fetch('/api/mode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode })
+        });
+        const data = await res.json();
+        alert(data.message || "Режим успешно изменен!");
+        fetchStatus();
+      } catch (err) {
+        alert("Ошибка переключения режима: " + err);
       }
     }
 
@@ -602,15 +689,6 @@
         }
       } catch (err) {
         console.error("Test failed:", err);
-      }
-    }
-
-    async function controlService(action) {
-      try {
-        await fetch(`/api/${action}`, { method: 'POST' });
-        setTimeout(fetchStatus, 1000);
-      } catch (err) {
-        alert("Ошибка выполнения команды: " + err);
       }
     }
 

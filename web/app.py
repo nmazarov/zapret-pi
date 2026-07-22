@@ -207,6 +207,48 @@ def serve_index():
 
 
 # ---------------------------------------------------------------------------
+# API: Operating Mode (Zapret / SmartDNS VLESS / Hybrid)
+# ---------------------------------------------------------------------------
+
+@app.route("/api/mode", methods=["GET", "POST"])
+def api_mode():
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        mode = data.get("mode", "hybrid").lower()
+        log.info("Switching operating mode to: %s", mode)
+        
+        if mode == "zapret":
+            _run("systemctl start zapret", timeout=15)
+            _run("systemctl stop xray", timeout=15)
+            msg = "Переключено в режим Zapret (DPI Bypass)"
+        elif mode == "vless":
+            _run("systemctl stop zapret", timeout=15)
+            _run("systemctl start xray", timeout=15)
+            msg = "Переключено в режим SmartDNS + VLESS (Только DNS)"
+        else: # hybrid
+            _run("systemctl start zapret", timeout=15)
+            _run("systemctl start xray", timeout=15)
+            msg = "Переключено в Гибридный режим (Zapret + SmartDNS VLESS)"
+            
+        return jsonify({"success": True, "mode": mode, "message": msg})
+    
+    # GET status
+    _, zapret_st, _ = _run("systemctl is-active zapret", timeout=5)
+    _, xray_st, _ = _run("systemctl is-active xray", timeout=5)
+    
+    z_active = zapret_st == "active"
+    x_active = xray_st == "active"
+    
+    current_mode = "hybrid" if (z_active and x_active) else ("zapret" if z_active else ("vless" if x_active else "stopped"))
+    
+    return jsonify({
+        "mode": current_mode,
+        "zapret_active": z_active,
+        "xray_active": x_active
+    })
+
+
+# ---------------------------------------------------------------------------
 # API: Status
 # ---------------------------------------------------------------------------
 
