@@ -61,6 +61,8 @@ show_help() {
     echo "  Опции:"
     echo "    --help          Показать эту справку"
     echo "    --skip-web      Не устанавливать веб-панель"
+    echo "    --skip-apt      Пропустить обновление пакетов apt"
+    echo "    --fast          Быстрый запуск без повторной компиляции"
     echo ""
     echo "  Переменные окружения:"
     echo "    RPI_IP=X.X.X.X       Статический IP для Raspberry Pi"
