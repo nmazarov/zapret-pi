@@ -42,7 +42,7 @@
 
     .container {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1240px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -127,21 +127,21 @@
       50% { opacity: 0.5; transform: scale(0.85); }
     }
 
-    /* Grid System */
-    .grid-top {
+    /* Grid Layouts */
+    .grid-main {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1.3fr 1fr;
       gap: 20px;
     }
 
     .grid-bottom {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
     @media (max-width: 1024px) {
-      .grid-top { grid-template-columns: 1fr; }
+      .grid-main { grid-template-columns: 1fr; }
       .grid-bottom { grid-template-columns: 1fr; }
     }
 
@@ -149,7 +149,7 @@
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(12px);
-      padding: 22px;
+      padding: 24px;
       border-radius: var(--radius);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
       display: flex;
@@ -159,50 +159,56 @@
     }
 
     .card-title {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
     }
 
-    /* Services Grid */
+    /* Expanded Services Grid (Spacious Layout) */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .services-grid { grid-template-columns: 1fr; }
     }
 
     .service-item {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 10px 12px;
-      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 16px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      min-width: 0;
+      gap: 12px;
+      min-height: 52px;
     }
 
     .service-name {
-      font-size: 0.85rem;
+      font-size: 0.92rem;
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .badge-ok {
       background: rgba(16, 185, 129, 0.2);
       color: var(--primary);
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.72rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
       font-weight: 700;
+      letter-spacing: 0.5px;
       white-space: nowrap;
       flex-shrink: 0;
     }
@@ -210,10 +216,11 @@
     .badge-fail {
       background: rgba(239, 68, 68, 0.2);
       color: var(--danger);
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.72rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
       font-weight: 700;
+      letter-spacing: 0.5px;
       white-space: nowrap;
       flex-shrink: 0;
     }
@@ -221,9 +228,9 @@
     .badge-wait {
       background: rgba(148, 163, 184, 0.2);
       color: var(--text-muted);
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.72rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
       font-weight: 700;
       white-space: nowrap;
       flex-shrink: 0;
@@ -232,16 +239,16 @@
     /* Buttons */
     .btn {
       width: 100%;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 0.88rem;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 0.92rem;
       font-weight: 600;
       border: none;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       transition: all 0.2s ease;
       white-space: nowrap;
     }
@@ -251,7 +258,7 @@
       color: white;
       box-shadow: 0 4px 14px var(--primary-glow);
     }
-    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:hover { opacity: 0.95; transform: translateY(-1px); }
 
     .btn-secondary {
       background: rgba(51, 65, 85, 0.7);
@@ -267,7 +274,6 @@
     }
     .btn-danger:hover { background: rgba(239, 68, 68, 0.4); }
 
-    /* Equal width 3-button row */
     .btn-row-3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -280,11 +286,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 12px;
+      padding: 10px 14px;
       background: rgba(15, 23, 42, 0.5);
-      border-radius: 8px;
-      margin-bottom: 6px;
-      font-size: 0.85rem;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
     }
 
     .info-label { color: var(--text-muted); }
@@ -293,19 +299,20 @@
     /* Select */
     select {
       width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
+      padding: 12px;
+      border-radius: 12px;
       background: rgba(15, 23, 42, 0.9);
       color: white;
       border: 1px solid var(--card-border);
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       margin-bottom: 12px;
       outline: none;
+      cursor: pointer;
     }
 
     /* Stats */
     .stat-bar {
-      height: 6px;
+      height: 7px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 4px;
       overflow: hidden;
@@ -322,10 +329,10 @@
     .log-box {
       background: #050811;
       border: 1px solid var(--card-border);
-      padding: 12px;
-      border-radius: 10px;
+      padding: 14px;
+      border-radius: 12px;
       font-family: monospace;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       max-height: 180px;
       overflow-y: auto;
       color: #34d399;
@@ -334,7 +341,7 @@
 
     footer {
       text-align: center;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
       margin-top: 6px;
     }
@@ -353,47 +360,47 @@
           <div class="subtitle">Управление шлюзом DPI Bypass для PS5 & Сети</div>
         </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
         <div id="serviceStatusBadge" class="status-badge">
           <span class="dot"></span>
           <span id="serviceStatusText">Проверка...</span>
         </div>
-        <button class="btn btn-secondary" onclick="fetchStatus()" style="width: auto; padding: 7px 12px; font-size: 0.82rem;">↻ Обновить</button>
+        <button class="btn btn-secondary" onclick="fetchStatus()" style="width: auto; padding: 8px 14px; font-size: 0.85rem;">↻ Обновить</button>
       </div>
     </header>
 
-    <!-- Top Grid: 3 Equal Cards -->
-    <div class="grid-top">
+    <!-- Main Grid Top -->
+    <div class="grid-main">
 
-      <!-- Card 1: Express Test -->
+      <!-- Card 1: Expanded Services Access Test -->
       <div class="card">
         <div>
           <div class="card-title">
-            <span>⚡ Доступ к Сервисам</span>
-            <span id="pingBadge" class="badge-ok" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">Пинг: -- ms</span>
+            <span>⚡ Статус Доступа к Сервисам</span>
+            <span id="pingBadge" class="badge-ok" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-size: 0.8rem;">Пинг: -- ms</span>
           </div>
 
           <div class="services-grid">
             <div class="service-item">
-              <span class="service-name">🎮 EA Sports</span>
+              <span class="service-name">🎮 EA Sports (EA Play / UT)</span>
               <span id="targetEA" class="badge-wait">--</span>
             </div>
             <div class="service-item">
-              <span class="service-name">💬 Discord</span>
+              <span class="service-name">💬 Discord (Voice & Chat)</span>
               <span id="targetDiscord" class="badge-wait">--</span>
             </div>
             <div class="service-item">
-              <span class="service-name">📺 YouTube</span>
+              <span class="service-name">📺 YouTube (4K Video)</span>
               <span id="targetYouTube" class="badge-wait">--</span>
             </div>
             <div class="service-item">
-              <span class="service-name">🌐 PSN Network</span>
+              <span class="service-name">🌐 PSN Network (PlayStation)</span>
               <span id="targetPSN" class="badge-wait">--</span>
             </div>
           </div>
         </div>
 
-        <button class="btn btn-primary" onclick="runLiveTest()">▶ Проверить доступ сейчас</button>
+        <button class="btn btn-primary" onclick="runLiveTest()">▶ Запустить экспресс-тест доступа</button>
       </div>
 
       <!-- Card 2: PS5 Connection Settings -->
@@ -401,7 +408,7 @@
         <div>
           <div class="card-title">
             <span>🎮 Настройки для PS5</span>
-            <span style="font-size: 0.75rem; color: var(--text-muted);">Шлюз & DNS</span>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Шлюз & DNS</span>
           </div>
 
           <div class="info-row">
@@ -413,7 +420,7 @@
             <span class="info-val" id="rpiGwVal">192.168.1.118</span>
           </div>
           <div class="info-row">
-            <span class="info-label">Основной DNS:</span>
+            <span class="info-label">Основной DNS (Primary):</span>
             <span class="info-val">192.168.1.118</span>
           </div>
           <div class="info-row">
@@ -422,68 +429,78 @@
           </div>
         </div>
 
-        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;">
           💡 <b>PS5 ➔ Настройки ➔ Сеть ➔ Дополнительные настройки ➔ IP: Вручную</b>
         </div>
       </div>
 
-      <!-- Card 3: Strategy Selector -->
+    </div>
+
+    <!-- Bottom Grid: 3 Equal Cards -->
+    <div class="grid-bottom">
+
+      <!-- Card 3: Strategy Selection -->
       <div class="card">
         <div>
           <div class="card-title">
-            <span>⚙️ Стратегия DPI</span>
+            <span>⚙️ Выбор Стратегии DPI</span>
           </div>
 
-          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Выберите пресет:</label>
+          <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Выберите проверенный пресет:</label>
           <select id="strategySelect">
-            <option value="flowseal">Flowseal ALT (Рекомендуется для EA + Discord + YT)</option>
-            <option value="universal_md5sig">Universal MD5Sig (Стандартная)</option>
-            <option value="fakeddisorder">Fake + Disorder (ТСПУ v2)</option>
-            <option value="multisplit_seqovl">MultiSplit + SeqOvl (Максимальная)</option>
+            <option value="flowseal_alt">1. Flowseal ALT (Рекомендуется для EA + Discord + YT)</option>
+            <option value="multisplit_seqovl">2. MultiSplit + SeqOvl (Продвинутый ТСПУ Обход)</option>
+            <option value="fakeddisorder">3. Fake + Disorder (Ростелеком / МТС / Билайн)</option>
+            <option value="universal_md5sig">4. Universal MD5Sig (Стабильная)</option>
           </select>
         </div>
 
         <button class="btn btn-primary" onclick="applySelectedStrategy()">Применить стратегию</button>
       </div>
 
-    </div>
-
-    <!-- Bottom Grid: 2 Equal Cards -->
-    <div class="grid-bottom">
-
-      <!-- Card 4: Service Controls (Perfectly Aligned 3-Button Grid) -->
+      <!-- Card 4: Service Controls -->
       <div class="card">
-        <div class="card-title">
-          <span>🛡️ Управление Службой</span>
-          <span id="controlStatusLabel" style="font-size: 0.8rem; font-weight: 700; color: #10b981;">Активен</span>
+        <div>
+          <div class="card-title">
+            <span>🛡️ Управление Службой</span>
+            <span id="controlStatusLabel" style="font-size: 0.82rem; font-weight: 700; color: #10b981;">Активен</span>
+          </div>
+
+          <div class="btn-row-3" style="margin-top: 10px;">
+            <button class="btn btn-primary" onclick="controlService('start')">▶ Старт</button>
+            <button class="btn btn-secondary" onclick="controlService('restart')">↻ Рестарт</button>
+            <button class="btn btn-danger" onclick="controlService('stop')">⏹ Стоп</button>
+          </div>
         </div>
 
-        <div class="btn-row-3">
-          <button class="btn btn-primary" onclick="controlService('start')">▶ Запустить</button>
-          <button class="btn btn-secondary" onclick="controlService('restart')">↻ Перезапуск</button>
-          <button class="btn btn-danger" onclick="controlService('stop')">⏹ Остановить</button>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 12px;">
+          Служба `zapret.service` работает на уровне ядра Linux.
         </div>
       </div>
 
       <!-- Card 5: System Resources -->
       <div class="card">
-        <div class="card-title">
-          <span>📊 Ресурсы Raspberry Pi</span>
-        </div>
-
         <div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
-            <span class="info-label">Загрузка ОЗУ:</span>
-            <span id="ramText" style="font-weight: 600;">-- %</span>
+          <div class="card-title">
+            <span>📊 Ресурсы Raspberry Pi</span>
           </div>
-          <div class="stat-bar"><div id="ramFill" class="stat-fill"></div></div>
-        </div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-top: 8px;">
-          <span class="info-label">Температура ЦП:</span>
-          <span id="tempText" style="font-weight: 700; color: #f43f5e;">-- °C</span>
-          <span class="info-label">Uptime:</span>
-          <span id="uptimeText" style="font-weight: 600; color: #cbd5e1;">--</span>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+              <span class="info-label">Загрузка ОЗУ:</span>
+              <span id="ramText" style="font-weight: 600;">-- %</span>
+            </div>
+            <div class="stat-bar"><div id="ramFill" class="stat-fill"></div></div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 10px;">
+            <span class="info-label">Температура ЦП:</span>
+            <span id="tempText" style="font-weight: 700; color: #f43f5e;">-- °C</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 6px;">
+            <span class="info-label">Uptime:</span>
+            <span id="uptimeText" style="font-weight: 600; color: #cbd5e1;">--</span>
+          </div>
         </div>
       </div>
 
@@ -493,7 +510,7 @@
     <div class="card">
       <div class="card-title">
         <span>📜 Логи Системы (zapret)</span>
-        <button class="btn btn-secondary" onclick="fetchLogs()" style="width: auto; padding: 5px 10px; font-size: 0.78rem;">Обновить логи</button>
+        <button class="btn btn-secondary" onclick="fetchLogs()" style="width: auto; padding: 6px 12px; font-size: 0.8rem;">Обновить логи</button>
       </div>
       <div id="logBox" class="log-box">Загрузка логов...</div>
     </div>
@@ -600,14 +617,14 @@
       const val = select.value;
 
       let args = "";
-      if (val === 'flowseal') {
-        args = '--filter-tcp=80,443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00';
-      } else if (val === 'universal_md5sig') {
-        args = '--dpi-desync=fake,split2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1';
+      if (val === 'flowseal_alt') {
+        args = '--filter-tcp=80,443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --new --filter-udp=443,19294-19344,50000-50100 --dpi-desync=fake --dpi-desync-repeats=6';
+      } else if (val === 'multisplit_seqovl') {
+        args = '--filter-tcp=80,443 --dpi-desync=multisplit --dpi-desync-split-seqovl=2 --dpi-desync-split-pos=1,midsld --dpi-desync-fooling=md5sig --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6';
       } else if (val === 'fakeddisorder') {
-        args = '--dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1';
+        args = '--filter-tcp=80,443 --dpi-desync=fake,disorder2 --dpi-desync-split-pos=1,midsld --dpi-desync-fooling=md5sig --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6';
       } else {
-        args = '--dpi-desync=multisplit --dpi-desync-split-seqovl=2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig';
+        args = '--filter-tcp=80,443 --dpi-desync=fake,split2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1 --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6';
       }
 
       try {
