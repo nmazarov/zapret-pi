@@ -321,38 +321,54 @@ def api_apply_strategy():
 
     log.info("Applying strategy args: %s", args)
 
-    # Read existing config
-    lines: list[str] = []
-    found = False
-    try:
-        with open(ZAPRET_CONFIG, "r") as fh:
-            for line in fh:
-                if line.strip().startswith("NFQWS_OPT="):
-                    lines.append(f'NFQWS_OPT="{args}"\n')
-                    found = True
-                else:
-                    lines.append(line)
-    except FileNotFoundError:
-        lines = []
+    # Clean single-line formatting for NFQWS_OPT
+    clean_args = " ".join(args.split())
+    
+    # Safely replace NFQWS_OPT block in /opt/zapret/config
+    config_path = ZAPRET_CONFIG
+    new_lines = []
+    in_opt_block = False
+    opt_written = False
 
-    if not found:
-        lines.append(f'NFQWS_OPT="{args}"\n')
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r") as fh:
+                for line in fh:
+                    stripped = line.strip()
+                    if stripped.startswith("NFQWS_OPT="):
+                        new_lines.append(f'NFQWS_OPT="{clean_args}"\n')
+                        opt_written = True
+                        if line.rstrip().endswith('\\') or (stripped.startswith('NFQWS_OPT="') and not stripped.endswith('"')):
+                            in_opt_block = True
+                        continue
+
+                    if in_opt_block:
+                        if stripped.endswith('"') or stripped.endswith("'") or not line.rstrip().endswith('\\'):
+                            in_opt_block = False
+                        continue
+
+                    new_lines.append(line)
+        except OSError as exc:
+            log.error("Failed to read config: %s", exc)
+
+    if not opt_written:
+        new_lines.append(f'NFQWS_OPT="{clean_args}"\n')
 
     try:
-        with open(ZAPRET_CONFIG, "w") as fh:
-            fh.writelines(lines)
+        with open(config_path, "w") as fh:
+            fh.writelines(new_lines)
     except OSError as exc:
         log.error("Failed to write config: %s", exc)
         return jsonify({"success": False, "message": str(exc)}), 500
 
-    # Restart zapret to apply
+    # Restart zapret to apply changes
     rc, out, err = _run("systemctl restart zapret", timeout=30)
     ok = rc == 0
     if ok:
-        log.info("Strategy applied and zapret restarted")
+        log.info("Strategy applied and zapret restarted successfully")
     else:
         log.error("Failed to restart zapret after applying strategy: %s", err)
-    return jsonify({"success": ok, "message": "Стратегия применена" if ok else f"Ошибка перезапуска: {err}"})
+    return jsonify({"success": ok, "message": "Стратегия успешно применена и запущен zapret" if ok else f"Ошибка при перезапуске zapret: {err}"})
 
 
 # ---------------------------------------------------------------------------
