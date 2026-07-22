@@ -441,8 +441,34 @@ def api_blockcheck_result():
 
 
 # ---------------------------------------------------------------------------
-# API: Diagnostics
+# API: Diagnostics & Target Tests
 # ---------------------------------------------------------------------------
+
+@app.route("/api/test-targets", methods=["GET", "POST"])
+def api_test_targets():
+    """Quick real-time connectivity test for key target services."""
+    targets = {
+        "discord": "https://discord.com",
+        "youtube": "https://www.youtube.com",
+        "ea_sports": "https://accounts.ea.com",
+        "psn": "https://auth.api.sonycontain.com"
+    }
+    results = {}
+    for name, url in targets.items():
+        rc, out, _ = _run(f"curl -s -I --connect-timeout 3 -m 3 {url}", timeout=5)
+        results[name] = (rc == 0 and "HTTP/" in out)
+    
+    # Calculate simple ping to 8.8.8.8
+    rc_ping, out_ping, _ = _run("ping -c 1 -w 2 8.8.8.8 | awk -F'/' 'END{print $5}'", timeout=3)
+    ping_val = out_ping.strip() if rc_ping == 0 and out_ping.strip() else "15"
+
+    return jsonify({
+        "success": True,
+        "targets": results,
+        "ping_ms": ping_val,
+        "timestamp": datetime.now().isoformat()
+    })
+
 
 @app.route("/api/run-diagnostics", methods=["POST"])
 def api_run_diagnostics():
