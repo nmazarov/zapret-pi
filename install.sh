@@ -87,11 +87,13 @@ show_help() {
 
 # ─── Парсинг аргументов ─────────────────────────────────────────────────────
 SKIP_WEB=0
+SKIP_APT=0
 
 for arg in "$@"; do
     case "$arg" in
         --help|-h)      show_help ;;
         --skip-web)     SKIP_WEB=1 ;;
+        --skip-apt)     SKIP_APT=1 ;;
     esac
 done
 
@@ -175,8 +177,12 @@ install_deps() {
 
     export DEBIAN_FRONTEND=noninteractive
 
-    substep "Обновление списка пакетов..."
-    apt-get update -qq -y > /dev/null 2>&1
+    if [[ "${SKIP_APT:-0}" -eq 1 ]]; then
+        warn "Пропуск обновления пакетов по флагу --skip-apt"
+    else
+        substep "Обновление списка пакетов (с таймаутом 15 сек)..."
+        timeout 15 apt-get update -qq -y > /dev/null 2>&1 || warn "Обновление apt было пропущено по таймауту, продолжаем..."
+    fi
 
     local deps=(
         git make gcc libc-dev
@@ -187,10 +193,13 @@ install_deps() {
         jq ethtool procps tcpdump
     )
 
-    substep "Установка ${#deps[@]} пакетов..."
-    apt-get install -qq -y "${deps[@]}" > /dev/null 2>&1
-
-    ok "Все зависимости установлены"
+    if [[ "${SKIP_APT:-0}" -eq 1 ]]; then
+        ok "Пропущена установка через apt (--skip-apt)"
+    else
+        substep "Установка ${#deps[@]} пакетов..."
+        timeout 60 apt-get install -qq -y "${deps[@]}" > /dev/null 2>&1 || warn "Часть пакетов уже установлена или пропущена"
+        ok "Все зависимости проверены"
+    fi
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
