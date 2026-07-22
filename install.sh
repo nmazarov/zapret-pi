@@ -45,27 +45,12 @@ ERRORS=0
 # ─── Баннер ─────────────────────────────────────────────────────────────────
 banner() {
     clear
-    echo ""
-    echo -e "${CYAN}"
+    echo -e "${CYAN}${BOLD}"
     echo '   ╔══════════════════════════════════════════════════════════╗'
-    echo '   ║                                                        ║'
-    echo '   ║   ███████╗ █████╗ ██████╗ ██████╗ ███████╗████████╗    ║'
-    echo '   ║   ╚══███╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝╚══██╔══╝    ║'
-    echo '   ║     ███╔╝ ███████║██████╔╝██████╔╝█████╗     ██║       ║'
-    echo '   ║    ███╔╝  ██╔══██║██╔═══╝ ██╔══██╗██╔══╝     ██║       ║'
-    echo '   ║   ███████╗██║  ██║██║     ██║  ██║███████╗   ██║       ║'
-    echo '   ║   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝       ║'
-    echo '   ║                     ╔═══╗ ╦                             ║'
-    echo '   ║                     ╠═══╝ ║                             ║'
-    echo '   ║                     ╩     ╩                             ║'
-    echo '   ║                                                        ║'
-    echo '   ║       🛡️  DPI Bypass для Raspberry Pi                   ║'
-    echo '   ║       📺 PS5 · 🖥️ PC · 📱 Phone · 📺 Smart TV          ║'
-    echo '   ║                                                        ║'
+    echo '   ║             🛡️ ZAPRET-PI · БЫСТРЫЙ СТАРТ                  ║'
+    echo '   ║         Обход блокировок для PS5 / PC / TV           ║'
     echo '   ╚══════════════════════════════════════════════════════════╝'
     echo -e "${NC}"
-    echo -e "   ${DIM}github.com/nmazarov/zapret-pi${NC}"
-    echo ""
 }
 
 # ─── Справка ────────────────────────────────────────────────────────────────
@@ -209,28 +194,32 @@ install_deps() {
 install_zapret() {
     step "⚡ Шаг 2/9 — Установка Zapret"
 
-    # Клонирование
-    substep "Установка встроенной версии zapret..."
-    rm -rf /opt/zapret
-    if [[ -d "linux/zapret" ]]; then
-        cp -r linux/zapret /opt/zapret
-    else
-        fail "Встроенная папка linux/zapret не найдена! Скачайте проект целиком."
-        exit 1
+    # Копирование встроенной версии
+    if [[ ! -d "/opt/zapret" ]]; then
+        substep "Копирование файлов Zapret..."
+        if [[ -d "$PROJECT_DIR/linux/zapret" ]]; then
+            cp -r "$PROJECT_DIR/linux/zapret" /opt/zapret
+        else
+            fail "Встроенная папка linux/zapret не найдена!"
+            exit 1
+        fi
+        ok "Файлы Zapret скопированы"
     fi
-    ok "Zapret загружен"
 
-    # Сборка
-    substep "Сборка nfqws, tpws, ip2net..."
-    cd /opt/zapret
-    make clean > /dev/null 2>&1 || true
-    make > /dev/null 2>&1
-    if [[ $? -ne 0 ]]; then
-        fail "Ошибка сборки! Попробуй: cd /opt/zapret && make"
-        ((ERRORS++))
-        return
+    # Сборка nfqws, tpws
+    if [[ -f "/opt/zapret/bin/nfqws" ]]; then
+        ok "Бинарники nfqws уже собраны"
+    else
+        substep "Компиляция nfqws, tpws (компиляция ~20 сек)..."
+        cd /opt/zapret
+        make -j$(nproc 2>/dev/null || echo 2) > /dev/null 2>&1 || make > /dev/null 2>&1
+        if [[ $? -ne 0 ]]; then
+            fail "Ошибка сборки! Попробуй: cd /opt/zapret && make"
+            ((ERRORS++))
+            return
+        fi
+        ok "Zapret успешно собран"
     fi
-    ok "Zapret собран"
 
     # Установка бинарников
     if [[ -f /opt/zapret/install_bin.sh ]]; then
@@ -250,12 +239,17 @@ download_flowseal_lists() {
     local lists_dir="/opt/zapret-pi/lists"
     mkdir -p "$lists_dir"
     
-    substep "Скачивание списков доменов..."
+    substep "Проверка и загрузка списков доменов..."
     local raw_url="https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists"
     local mirror_url="https://ghproxy.net/https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists"
 
     for list in list-general.txt list-google.txt list-exclude.txt ipset-exclude.txt ipset-all.txt; do
-        curl -sL "$raw_url/$list" -o "$lists_dir/$list" || curl -sL "$mirror_url/$list" -o "$lists_dir/$list"
+        if [[ -f "$PROJECT_DIR/windows/zapret/lists/$list" ]]; then
+            cp "$PROJECT_DIR/windows/zapret/lists/$list" "$lists_dir/$list"
+        else
+            curl -sL --connect-timeout 4 -m 6 "$raw_url/$list" -o "$lists_dir/$list" 2>/dev/null || \
+            curl -sL --connect-timeout 4 -m 6 "$mirror_url/$list" -o "$lists_dir/$list" 2>/dev/null || true
+        fi
     done
 
     # Создаем пустые user-листы
@@ -263,7 +257,7 @@ download_flowseal_lists() {
     touch "$lists_dir/list-exclude-user.txt"
     touch "$lists_dir/ipset-exclude-user.txt"
     
-    ok "Списки Flowseal успешно скачаны"
+    ok "Списки Flowseal подгружены"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
