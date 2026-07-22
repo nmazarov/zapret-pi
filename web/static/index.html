@@ -172,7 +172,7 @@
     .services-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
+      gap: 12px;
       margin-bottom: 20px;
     }
 
@@ -183,17 +183,19 @@
     .service-item {
       background: rgba(15, 23, 42, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 14px 18px;
+      padding: 12px 14px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      min-height: 56px;
+      gap: 10px;
+      min-height: 52px;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .service-name {
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       font-weight: 600;
       display: flex;
       align-items: center;
@@ -201,41 +203,49 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
     }
 
     .badge-ok {
       background: rgba(16, 185, 129, 0.2);
       color: var(--primary);
-      padding: 6px 14px;
+      padding: 4px 10px;
       border-radius: 8px;
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
       letter-spacing: 0.5px;
       white-space: nowrap;
       flex-shrink: 0;
+      text-align: center;
+      display: inline-block;
     }
 
     .badge-fail {
       background: rgba(239, 68, 68, 0.2);
       color: var(--danger);
-      padding: 6px 14px;
+      padding: 4px 10px;
       border-radius: 8px;
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
       letter-spacing: 0.5px;
       white-space: nowrap;
       flex-shrink: 0;
+      text-align: center;
+      display: inline-block;
     }
 
     .badge-wait {
       background: rgba(148, 163, 184, 0.2);
       color: var(--text-muted);
-      padding: 6px 14px;
+      padding: 4px 10px;
       border-radius: 8px;
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
       white-space: nowrap;
       flex-shrink: 0;
+      text-align: center;
+      display: inline-block;
     }
 
     /* Mode Selector Buttons */
@@ -418,19 +428,19 @@
 
           <div class="services-grid">
             <div class="service-item">
-              <span class="service-name">🎮 EA Sports (EA Play / UT)</span>
+              <span class="service-name">🎮 EA Sports</span>
               <span id="targetEA" class="badge-wait">--</span>
             </div>
             <div class="service-item">
-              <span class="service-name">💬 Discord (Voice & Chat)</span>
+              <span class="service-name">💬 Discord</span>
               <span id="targetDiscord" class="badge-wait">--</span>
             </div>
             <div class="service-item">
-              <span class="service-name">📺 YouTube (4K Video)</span>
+              <span class="service-name">📺 YouTube</span>
               <span id="targetYouTube" class="badge-wait">--</span>
             </div>
             <div class="service-item">
-              <span class="service-name">🌐 PSN Network (PlayStation)</span>
+              <span class="service-name">🌐 PSN Network</span>
               <span id="targetPSN" class="badge-wait">--</span>
             </div>
           </div>
