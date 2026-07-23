@@ -248,6 +248,25 @@ def api_mode():
     })
 
 
+@app.route("/api/setup-vless", methods=["POST"])
+def api_setup_vless():
+    data = request.get_json(silent=True) or {}
+    vless_url = data.get("vless_url", "").strip()
+    if not vless_url:
+        return jsonify({"success": False, "message": "Введите vless:// ссылку"}), 400
+
+    log.info("Auto-configuring VLESS server via API")
+    parser_script = os.path.join(os.path.dirname(__file__), "..", "scripts", "vless_parser.py")
+    rc, out, err = _run(f"python3 {parser_script} '{vless_url}' /usr/local/etc/xray/config.json", timeout=15)
+    
+    if rc != 0:
+        return jsonify({"success": False, "message": f"Ошибка парсинга VLESS: {out or err}"}), 400
+
+    # Restart xray
+    _run("systemctl restart xray", timeout=15)
+    return jsonify({"success": True, "message": "VLESS подключение успешно настроено и запущен Xray!"})
+
+
 # ---------------------------------------------------------------------------
 # API: Status
 # ---------------------------------------------------------------------------

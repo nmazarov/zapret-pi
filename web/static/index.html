@@ -461,7 +461,7 @@
             <div id="modeOptHybrid" class="mode-option active" onclick="switchMode('hybrid')">
               <div>
                 <div class="mode-title">🛡️ Гибридный (Рекомендуется)</div>
-                <div class="mode-desc">Zapret DPI Bypass + SmartDNS VLESS (Нидерланды)</div>
+                <div class="mode-desc">Zapret DPI Bypass + SmartDNS VLESS</div>
               </div>
               <span style="font-size: 1.1rem;">✔</span>
             </div>
@@ -480,6 +480,14 @@
                 <div class="mode-desc">Локальная подмена пакетов (Шлюз + DNS)</div>
               </div>
               <span>›</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
+            <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 4px;">🔗 Своя VLESS ссылка (Авто-настройка):</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="vlessUrlInput" placeholder="vless://uuid@host:443?type=ws..." style="flex: 1; padding: 8px 10px; border-radius: 8px; background: rgba(15,23,42,0.9); color: white; border: 1px solid var(--card-border); font-size: 0.8rem; outline: none;">
+              <button class="btn btn-secondary" onclick="importVlessUrl()" style="width: auto; padding: 8px 12px; font-size: 0.8rem;">Подключить</button>
             </div>
           </div>
         </div>
@@ -731,6 +739,28 @@
         fetchStatus();
       } catch (err) {
         alert("Ошибка привязки стратегии: " + err);
+      }
+    }
+
+    async function importVlessUrl() {
+      const input = document.getElementById('vlessUrlInput');
+      const vless_url = input.value.trim();
+      if (!vless_url) {
+        alert("Пожалуйста, вставьте VLESS ссылку!");
+        return;
+      }
+      try {
+        const res = await fetch('/api/setup-vless', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vless_url })
+        });
+        const data = await res.json();
+        alert(data.message || "VLESS сервер успешно подключен!");
+        input.value = "";
+        fetchStatus();
+      } catch (err) {
+        alert("Ошибка настройки VLESS: " + err);
       }
     }
 
