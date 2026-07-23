@@ -5,13 +5,13 @@
 <h1 align="center">🛡️ Zapret-Pi 2.0</h1>
 
 <p align="center">
-  <strong>Полная автоматическая система обхода DPI-блокировок и SmartDNS VLESS на Raspberry Pi & Windows</strong><br/>
+  <strong>Полная автоматическая система обхода DPI-блокировок и SmartDNS VLESS на Raspberry Pi</strong><br/>
   Мгновенный доступ к EA Sports (Ultimate Team), Discord (Голос + Медиа), YouTube 4K, PSN Network и Twitch на PS5, Smart TV, ПК и смартфонах
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License MIT"/>
-  <img src="https://img.shields.io/badge/Platform-Raspberry%20Pi%20%7C%20Windows-c51a4a?style=flat-square&logo=raspberry-pi" alt="Platform"/>
+  <img src="https://img.shields.io/badge/Platform-Raspberry%20Pi-c51a4a?style=flat-square&logo=raspberry-pi" alt="Platform"/>
   <img src="https://img.shields.io/badge/VLESS-SmartDNS-blueviolet?style=flat-square" alt="VLESS SmartDNS"/>
   <img src="https://img.shields.io/badge/DPI--Bypass-Zapret%20nfqws-orange?style=flat-square" alt="Zapret nfqws"/>
   <img src="https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square" alt="Status"/>
@@ -30,9 +30,8 @@
 4. [🚀 Быстрый Старт (Raspberry Pi)](#-быстрый-старт-raspberry-pi)
 5. [🔗 Авто-Настройка VLESS по ссылке vless://](#-авто-настройка-vless-по-ссылке-vless)
 6. [🎮 Инструкции для PlayStation 5 & Устройств](#-инструкции-для-playstation-5--устройств)
-7. [💻 Windows Edition (Локальный обход на ПК)](#-windows-edition-локальный-обход-на-пк)
-8. [🖥️ Веб-Панель Управления](#️-веб-панель-управления)
-9. [❓ Частые Вопросы (FAQ) и Устранение Неполадок](#-частые-вопросы-faq-и-устранение-неполадок)
+7. [🖥️ Веб-Панель Управления](#️-веб-панель-управления)
+8. [❓ Частые Вопросы (FAQ) и Устранение Неполадок](#-частые-вопросы-faq-и-устранение-неполадок)
 
 ---
 
@@ -43,7 +42,7 @@
 - ⚡ **Нулевая задержка в играх (0 мс ping overhead):** Игровые сессии и P2P-матчмейкинг проходят напрямую от вашего провайдера без маршрутизации через тяжелые VPN.
 - 🌐 **Смена ТОЛЬКО DNS на консоли:** Больше не требуется вручную прописывать шлюзы на устройствах при использовании режима SmartDNS VLESS.
 - 🖥️ **Ultra-Modern Glassmorphism Web UI:** Экспресс-тест сервисов в 1 клик, мониторинг температуры ЦП, использования ОЗУ, смены стратегий DPI и логов.
-- 💻 **Кроссплатформенность:** Автоматическая поддержка Raspberry Pi OS (Debian 12/13 / Ubuntu) и Windows 10/11.
+- 🐧 **Поддержка Raspberry Pi OS:** Оптимизировано для Debian 12/13 и Ubuntu Server на Raspberry Pi 3 / 4 / 5.
 
 ---
 
@@ -233,20 +232,6 @@ sudo bash scripts/setup-vless.sh "vless://uuid@server.com:443?type=ws&security=t
    - **Основной шлюз (Gateway)**: **`<IP-Вашей-Raspberry-Pi>`**
    - **Основной DNS**: **`<IP-Вашей-Raspberry-Pi>`**
    - **Дополнительный DNS**: `8.8.8.8`
-
----
-
-## 💻 Windows Edition (Локальный обход на ПК)
-
-Если вам требуется обход блокировок локально на компьютере под управлением Windows 10/11:
-
-1. Зайдите в папку `windows/`.
-2. Запустите `install.bat` **от имени администратора**.
-3. Для выбора оптимальной стратегии под вашего провайдера запустите меню:
-   ```cmd
-   windows\menu.bat
-   ```
-4. В меню выберите пункт `0) Авто-подбор рабочей стратегии`. Меню само протестирует все пресеты и зафиксирует рабочий!
 
 ---
 

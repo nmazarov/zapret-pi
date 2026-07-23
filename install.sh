@@ -246,12 +246,8 @@ download_flowseal_lists() {
     local mirror_url="https://ghproxy.net/https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/main/lists"
 
     for list in list-general.txt list-google.txt list-exclude.txt ipset-exclude.txt ipset-all.txt; do
-        if [[ -f "$PROJECT_DIR/windows/zapret/lists/$list" ]]; then
-            cp "$PROJECT_DIR/windows/zapret/lists/$list" "$lists_dir/$list"
-        else
-            curl -sL --connect-timeout 4 -m 6 "$raw_url/$list" -o "$lists_dir/$list" 2>/dev/null || \
-            curl -sL --connect-timeout 4 -m 6 "$mirror_url/$list" -o "$lists_dir/$list" 2>/dev/null || true
-        fi
+        curl -sL --connect-timeout 4 -m 6 "$raw_url/$list" -o "$lists_dir/$list" 2>/dev/null || \
+        curl -sL --connect-timeout 4 -m 6 "$mirror_url/$list" -o "$lists_dir/$list" 2>/dev/null || true
     done
 
     # Создаем пустые user-листы
