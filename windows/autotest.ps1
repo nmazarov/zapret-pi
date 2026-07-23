@@ -1,4 +1,4 @@
-﻿# ZAPRET Windows Auto-Tester
+﻿# ZAPRET Windows Auto-Tester (Flowseal Presets)
 $SCRIPT_DIR = $PSScriptRoot
 $ZAPRET_DIR = Join-Path $SCRIPT_DIR "zapret"
 $CONFIG_FILE = Join-Path $ZAPRET_DIR "zapret-winws.ini"
@@ -6,22 +6,16 @@ $WINWS_EXE = Join-Path $ZAPRET_DIR "bin\winws.exe"
 
 Write-Host ""
 Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host "       АВТОМАТИЧЕСКИЙ ПОДБОР СТРАТЕГИЙ DPI        " -ForegroundColor Cyan
+Write-Host "     FLOWSEAL ZAPRET - АВТОМАТИЧЕСКИЙ ПОДБОР      " -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "[i] Поочередная проверка 6 встроенных профилей..." -ForegroundColor Yellow
+Write-Host "[i] Сканирование 20 встроенных пресетов Flowseal..." -ForegroundColor Yellow
 Write-Host ""
 
-$s1_args = '--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6 --new --filter-udp=19294-19344,50000-50100 --filter-l7=discord,stun --dpi-desync=fake --dpi-desync-repeats=6 --new --filter-tcp=2053,2083,2087,2096,8443 --hostlist-domains=discord.media --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --new --filter-tcp=443 --ip-id=zero --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --new --filter-tcp=80,443 --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6 --new --filter-tcp=80,443,8443 --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00'
-$s2_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=2 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-$s3_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=multisplit --dpi-desync-split-seqovl=2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,host+2 --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-$s4_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-$s5_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,multidisorder --dpi-desync-ttl=2 --dpi-desync-autottl=2:64:3 --dpi-desync-split-pos=1,midsld --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-$s6_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=4 --dpi-desync-fooling=md5sig --dpi-desync-split-http-req=host --dpi-desync-split-pos=1 --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-
-function Test-Single-Strategy([string]$tTitle, [string]$tArgs) {
-    Write-Host "   * Проверка: $tTitle..." -ForegroundColor Yellow -NoNewline
+function Test-Flowseal-Profile([string]$tTitle, [string]$tFileName, [string]$tArgs) {
+    Write-Host "   * Проверка $tTitle ($tFileName)..." -ForegroundColor Yellow -NoNewline
     Get-Process -Name "winws" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 300
     
     $proc = Start-Process -FilePath $WINWS_EXE -ArgumentList $tArgs -WindowStyle Hidden -PassThru
     Start-Sleep -Seconds 2
@@ -32,75 +26,202 @@ function Test-Single-Strategy([string]$tTitle, [string]$tArgs) {
     & curl.exe -4 -sL -I --connect-timeout 3 -m 4 "https://www.youtube.com" 2>&1 | Out-Null
     $ok2 = ($LASTEXITCODE -eq 0)
     
-    Get-Process -Name "winws" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 1
-    
     if ($ok1 -and $ok2) {
-        Write-Host " -> [OK] Идеально подходит!" -ForegroundColor Green
+        Write-Host " -> [OK] ИДЕАЛЬНО РАЗБЛОКИРУЕТ!" -ForegroundColor Green
         return $true
     }
     
+    Get-Process -Name "winws" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     Write-Host " -> [X] Заблокировано" -ForegroundColor Red
     return $false
 }
 
 $winnerName = ""
 $winnerTitle = ""
+$winnerFileName = ""
 $winnerArgs = ""
 
-if (Test-Single-Strategy "Flowseal ALT" $s1_args) {
-    $winnerName = "flowseal_alt"
-    $winnerTitle = "Flowseal ALT"
-    $winnerArgs = $s1_args
+if ($winnerFileName -eq "") {
+    $args_0 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT)" "general (ALT).bat" $args_0) {
+        $winnerTitle = "Flowseal (ALT)"
+        $winnerFileName = "general (ALT).bat"
+        $winnerArgs = $args_0
+    }
 }
-if ($winnerName -eq "" -and (Test-Single-Strategy "Universal MD5Sig" $s2_args)) {
-    $winnerName = "universal_md5sig"
-    $winnerTitle = "Universal MD5Sig"
-    $winnerArgs = $s2_args
+if ($winnerFileName -eq "") {
+    $args_1 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT10)" "general (ALT10).bat" $args_1) {
+        $winnerTitle = "Flowseal (ALT10)"
+        $winnerFileName = "general (ALT10).bat"
+        $winnerArgs = $args_1
+    }
 }
-if ($winnerName -eq "" -and (Test-Single-Strategy "MultiSplit SeqOvl" $s3_args)) {
-    $winnerName = "multisplit_seqovl"
-    $winnerTitle = "MultiSplit SeqOvl"
-    $winnerArgs = $s3_args
+if ($winnerFileName -eq "") {
+    $args_2 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT11)" "general (ALT11).bat" $args_2) {
+        $winnerTitle = "Flowseal (ALT11)"
+        $winnerFileName = "general (ALT11).bat"
+        $winnerArgs = $args_2
+    }
 }
-if ($winnerName -eq "" -and (Test-Single-Strategy "FakedDisorder" $s4_args)) {
-    $winnerName = "fakeddisorder"
-    $winnerTitle = "FakedDisorder"
-    $winnerArgs = $s4_args
+if ($winnerFileName -eq "") {
+    $args_3 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT12)" "general (ALT12).bat" $args_3) {
+        $winnerTitle = "Flowseal (ALT12)"
+        $winnerFileName = "general (ALT12).bat"
+        $winnerArgs = $args_3
+    }
 }
-if ($winnerName -eq "" -and (Test-Single-Strategy "TTL-based" $s5_args)) {
-    $winnerName = "ttl_based"
-    $winnerTitle = "TTL-based"
-    $winnerArgs = $s5_args
+if ($winnerFileName -eq "") {
+    $args_4 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT2)" "general (ALT2).bat" $args_4) {
+        $winnerTitle = "Flowseal (ALT2)"
+        $winnerFileName = "general (ALT2).bat"
+        $winnerArgs = $args_4
+    }
 }
-if ($winnerName -eq "" -and (Test-Single-Strategy "HostFakeSplit" $s6_args)) {
-    $winnerName = "hostfakesplit"
-    $winnerTitle = "HostFakeSplit"
-    $winnerArgs = $s6_args
+if ($winnerFileName -eq "") {
+    $args_5 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT3)" "general (ALT3).bat" $args_5) {
+        $winnerTitle = "Flowseal (ALT3)"
+        $winnerFileName = "general (ALT3).bat"
+        $winnerArgs = $args_5
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_6 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT4)" "general (ALT4).bat" $args_6) {
+        $winnerTitle = "Flowseal (ALT4)"
+        $winnerFileName = "general (ALT4).bat"
+        $winnerArgs = $args_6
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_7 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT5)" "general (ALT5).bat" $args_7) {
+        $winnerTitle = "Flowseal (ALT5)"
+        $winnerFileName = "general (ALT5).bat"
+        $winnerArgs = $args_7
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_8 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT6)" "general (ALT6).bat" $args_8) {
+        $winnerTitle = "Flowseal (ALT6)"
+        $winnerFileName = "general (ALT6).bat"
+        $winnerArgs = $args_8
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_9 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT7)" "general (ALT7).bat" $args_9) {
+        $winnerTitle = "Flowseal (ALT7)"
+        $winnerFileName = "general (ALT7).bat"
+        $winnerArgs = $args_9
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_10 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT8)" "general (ALT8).bat" $args_10) {
+        $winnerTitle = "Flowseal (ALT8)"
+        $winnerFileName = "general (ALT8).bat"
+        $winnerArgs = $args_10
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_11 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (ALT9)" "general (ALT9).bat" $args_11) {
+        $winnerTitle = "Flowseal (ALT9)"
+        $winnerFileName = "general (ALT9).bat"
+        $winnerArgs = $args_11
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_12 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (FAKE TLS AUTO ALT)" "general (FAKE TLS AUTO ALT).bat" $args_12) {
+        $winnerTitle = "Flowseal (FAKE TLS AUTO ALT)"
+        $winnerFileName = "general (FAKE TLS AUTO ALT).bat"
+        $winnerArgs = $args_12
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_13 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (FAKE TLS AUTO ALT2)" "general (FAKE TLS AUTO ALT2).bat" $args_13) {
+        $winnerTitle = "Flowseal (FAKE TLS AUTO ALT2)"
+        $winnerFileName = "general (FAKE TLS AUTO ALT2).bat"
+        $winnerArgs = $args_13
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_14 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (FAKE TLS AUTO ALT3)" "general (FAKE TLS AUTO ALT3).bat" $args_14) {
+        $winnerTitle = "Flowseal (FAKE TLS AUTO ALT3)"
+        $winnerFileName = "general (FAKE TLS AUTO ALT3).bat"
+        $winnerArgs = $args_14
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_15 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (FAKE TLS AUTO)" "general (FAKE TLS AUTO).bat" $args_15) {
+        $winnerTitle = "Flowseal (FAKE TLS AUTO)"
+        $winnerFileName = "general (FAKE TLS AUTO).bat"
+        $winnerArgs = $args_15
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_16 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (SIMPLE FAKE ALT)" "general (SIMPLE FAKE ALT).bat" $args_16) {
+        $winnerTitle = "Flowseal (SIMPLE FAKE ALT)"
+        $winnerFileName = "general (SIMPLE FAKE ALT).bat"
+        $winnerArgs = $args_16
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_17 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (SIMPLE FAKE ALT2)" "general (SIMPLE FAKE ALT2).bat" $args_17) {
+        $winnerTitle = "Flowseal (SIMPLE FAKE ALT2)"
+        $winnerFileName = "general (SIMPLE FAKE ALT2).bat"
+        $winnerArgs = $args_17
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_18 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal (SIMPLE FAKE)" "general (SIMPLE FAKE).bat" $args_18) {
+        $winnerTitle = "Flowseal (SIMPLE FAKE)"
+        $winnerFileName = "general (SIMPLE FAKE).bat"
+        $winnerArgs = $args_18
+    }
+}
+if ($winnerFileName -eq "") {
+    $args_19 = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^"
+    if (Test-Flowseal-Profile "Flowseal General Default" "general.bat" $args_19) {
+        $winnerTitle = "Flowseal General Default"
+        $winnerFileName = "general.bat"
+        $winnerArgs = $args_19
+    }
 }
 
-if ($winnerName -eq "") {
+if ($winnerFileName -eq "") {
     Write-Host ""
     Write-Host "==================================================" -ForegroundColor Red
-    Write-Host " [!] НИ ОДНА ИЗ ВСТРОЕННЫХ СТРАТЕГИЙ НЕ ПОДОШЛА   " -ForegroundColor Red
+    Write-Host " [!] НИ ОДИН ИЗ ПРЕСЕТОВ FLOWSEAL НЕ ПОДОШЕЛ     " -ForegroundColor Red
     Write-Host "==================================================" -ForegroundColor Red
     Write-Host "Рекомендуется использовать SmartDNS VLESS на Raspberry Pi." -ForegroundColor Yellow
     Write-Host ""
     exit 1
 }
 
-$configContent = "STRATEGY=" + $winnerName + "`r`nARGS=" + $winnerArgs
+$configContent = "WINWS_BAT=" + $winnerFileName + "`r`nARGS=" + $winnerArgs
 Set-Content -Path $CONFIG_FILE -Value $configContent -Encoding UTF8
-
-Start-Process -FilePath $WINWS_EXE -ArgumentList $winnerArgs -WindowStyle Hidden
 
 Write-Host ""
 Write-Host "==================================================" -ForegroundColor Green
 Write-Host "   [OK] АВТОМАТИЧЕСКИЙ ПОДБОР УСПЕШНО ЗАВЕРШЕН    " -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "   * Подошла стратегия: $winnerTitle" -ForegroundColor Cyan
-Write-Host "   * Статус службы:     [OK] АКТИВИРОВАНА И РАБОТАЕТ" -ForegroundColor Green
+Write-Host "   * Подошел пресет: $winnerTitle ($winnerFileName)" -ForegroundColor Cyan
+Write-Host "   * Статус службы:  [OK] АКТИВИРОВАН И РАБОТАЕТ" -ForegroundColor Green
 Write-Host ""
 Write-Host "[Результат доступа]" -ForegroundColor Yellow
 Write-Host "   * Discord:  [OK] ДОСТУПЕН" -ForegroundColor Green

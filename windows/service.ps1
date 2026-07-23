@@ -1,4 +1,4 @@
-﻿# ZAPRET Windows Service Manager
+﻿# ZAPRET Windows Service Manager (Flowseal Presets)
 param([string]$action)
 
 $SCRIPT_DIR = $PSScriptRoot
@@ -6,9 +6,11 @@ $ZAPRET_DIR = Join-Path $SCRIPT_DIR "zapret"
 $CONFIG_FILE = Join-Path $ZAPRET_DIR "zapret-winws.ini"
 $WINWS_EXE = Join-Path $ZAPRET_DIR "bin\winws.exe"
 
+$curBat = ""
 $winArgs = ""
 if (Test-Path $CONFIG_FILE) {
     foreach ($line in Get-Content $CONFIG_FILE) {
+        if ($line -match "^WINWS_BAT=(.+)$") { $curBat = $matches[1] }
         if ($line -match "^ARGS=(.+)$") { $winArgs = $matches[1] }
     }
 }
@@ -49,7 +51,11 @@ if ($action -eq "start" -or $action -eq "restart") {
     Write-Host "   [*] Запуск процесса winws.exe..." -ForegroundColor Yellow
     $proc = Get-Process -Name "winws" -ErrorAction SilentlyContinue
     if (-not $proc) {
-        Start-Process -FilePath $WINWS_EXE -ArgumentList $winArgs -WindowStyle Hidden
+        if ($curBat -and (Test-Path (Join-Path $ZAPRET_DIR $curBat))) {
+            Start-Process -FilePath "cmd.exe" -ArgumentList "/c", (Join-Path $ZAPRET_DIR $curBat) -WorkingDirectory $ZAPRET_DIR -WindowStyle Hidden
+        } else {
+            Start-Process -FilePath $WINWS_EXE -ArgumentList $winArgs -WindowStyle Hidden
+        }
         Start-Sleep -Seconds 2
     }
     Write-Host "   [OK] Служба запущена!" -ForegroundColor Green
@@ -69,13 +75,7 @@ if ($action -eq "status") {
         Write-Host "   * Процесс winws.exe: [X] ОСТАНОВЛЕН" -ForegroundColor Red
     }
 
-    $curStrat = "не выбрана"
-    if (Test-Path $CONFIG_FILE) {
-        foreach ($line in Get-Content $CONFIG_FILE) {
-            if ($line -match "^STRATEGY=(.+)$") { $curStrat = $matches[1] }
-        }
-    }
-    Write-Host "   * Активный профиль:  $curStrat" -ForegroundColor Cyan
+    Write-Host "   * Активный пресет:  $curBat" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "[Экспресс-тест доступа]" -ForegroundColor Yellow
 

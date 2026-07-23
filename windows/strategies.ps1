@@ -1,72 +1,82 @@
-﻿# ZAPRET Windows Strategy Selector
+﻿# ZAPRET Windows Strategy Selector (Flowseal Presets)
 $SCRIPT_DIR = $PSScriptRoot
 $ZAPRET_DIR = Join-Path $SCRIPT_DIR "zapret"
 $CONFIG_FILE = Join-Path $ZAPRET_DIR "zapret-winws.ini"
 $WINWS_EXE = Join-Path $ZAPRET_DIR "bin\winws.exe"
 
-$s1_args = '--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6 --new --filter-udp=19294-19344,50000-50100 --filter-l7=discord,stun --dpi-desync=fake --dpi-desync-repeats=6 --new --filter-tcp=2053,2083,2087,2096,8443 --hostlist-domains=discord.media --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --new --filter-tcp=443 --ip-id=zero --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --new --filter-tcp=80,443 --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00 --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6 --new --filter-tcp=80,443,8443 --dpi-desync=fake,fakedsplit --dpi-desync-repeats=6 --dpi-desync-fooling=ts --dpi-desync-fakedsplit-pattern=0x00'
-$s2_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,fakedsplit --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-split-seqovl=2 --dpi-desync-fake-tls-mod=rnd,rndsni,dupsid --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-$s3_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=multisplit --dpi-desync-split-seqovl=2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,host+2 --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-$s4_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,disorder2 --dpi-desync-ttl=3 --dpi-desync-fooling=md5sig --dpi-desync-split-pos=1,midsld --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-$s5_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,multidisorder --dpi-desync-ttl=2 --dpi-desync-autottl=2:64:3 --dpi-desync-split-pos=1,midsld --dpi-desync-any-protocol --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-$s6_args = '--wf-tcp=80,443 --wf-udp=443 --dpi-desync=fake,split2 --dpi-desync-ttl=4 --dpi-desync-fooling=md5sig --dpi-desync-split-http-req=host --dpi-desync-split-pos=1 --new --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=6'
-
-$curName = "не выбрана"
+$curBat = "не выбран"
 if (Test-Path $CONFIG_FILE) {
     foreach ($line in Get-Content $CONFIG_FILE) {
-        if ($line -match "^STRATEGY=(.+)$") { $curName = $matches[1] }
+        if ($line -match "^WINWS_BAT=(.+)$") { $curBat = $matches[1] }
     }
 }
 
 Write-Host ""
 Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host "         ZAPRET - ВЫБОР СТРАТЕГИИ DPI BYPASS      " -ForegroundColor Cyan
+Write-Host "      FLOWSEAL ZAPRET - ВЫБОР ПРЕСЕТА DPI        " -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "   Текущий активный профиль: $curName" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "   1) Flowseal ALT (Рекомендуется)" -ForegroundColor Green
-Write-Host "      Подмена TLS/QUIC пакетов. Для Discord и YouTube."
-Write-Host ""
-Write-Host "   2) Универсальная (MD5Sig)" -ForegroundColor Green
-Write-Host "      Fake + FakedSplit + MD5Sig."
-Write-Host ""
-Write-Host "   3) MultiSplit SeqOvl (Максимальная)" -ForegroundColor Green
-Write-Host "      Множественная нарезка для сложных блокировок."
-Write-Host ""
-Write-Host "   4) FakedDisorder (ТСПУ v2)" -ForegroundColor Green
-Write-Host "      Перемешивание пакетов."
-Write-Host ""
-Write-Host "   5) TTL-based" -ForegroundColor Green
-Write-Host "      Fake + MultiDisorder + TTL."
-Write-Host ""
-Write-Host "   6) HostFakeSplit (Игровая)" -ForegroundColor Green
-Write-Host "      Минимальная задержка 0 мс для онлайн-игр."
-Write-Host ""
-Write-Host "   0) Выход"
+Write-Host "   Текущий активный пресет: $curBat" -ForegroundColor Yellow
 Write-Host ""
 
-$choice = Read-Host "   Выберите профиль [0-6]"
+Write-Host "    1) Flowseal (ALT) (general (ALT).bat)" -ForegroundColor Green
+Write-Host "    2) Flowseal (ALT10) (general (ALT10).bat)" -ForegroundColor Green
+Write-Host "    3) Flowseal (ALT11) (general (ALT11).bat)" -ForegroundColor Green
+Write-Host "    4) Flowseal (ALT12) (general (ALT12).bat)" -ForegroundColor Green
+Write-Host "    5) Flowseal (ALT2) (general (ALT2).bat)" -ForegroundColor Green
+Write-Host "    6) Flowseal (ALT3) (general (ALT3).bat)" -ForegroundColor Green
+Write-Host "    7) Flowseal (ALT4) (general (ALT4).bat)" -ForegroundColor Green
+Write-Host "    8) Flowseal (ALT5) (general (ALT5).bat)" -ForegroundColor Green
+Write-Host "    9) Flowseal (ALT6) (general (ALT6).bat)" -ForegroundColor Green
+Write-Host "   10) Flowseal (ALT7) (general (ALT7).bat)" -ForegroundColor Green
+Write-Host "   11) Flowseal (ALT8) (general (ALT8).bat)" -ForegroundColor Green
+Write-Host "   12) Flowseal (ALT9) (general (ALT9).bat)" -ForegroundColor Green
+Write-Host "   13) Flowseal (FAKE TLS AUTO ALT) (general (FAKE TLS AUTO ALT).bat)" -ForegroundColor Green
+Write-Host "   14) Flowseal (FAKE TLS AUTO ALT2) (general (FAKE TLS AUTO ALT2).bat)" -ForegroundColor Green
+Write-Host "   15) Flowseal (FAKE TLS AUTO ALT3) (general (FAKE TLS AUTO ALT3).bat)" -ForegroundColor Green
+Write-Host "   16) Flowseal (FAKE TLS AUTO) (general (FAKE TLS AUTO).bat)" -ForegroundColor Green
+Write-Host "   17) Flowseal (SIMPLE FAKE ALT) (general (SIMPLE FAKE ALT).bat)" -ForegroundColor Green
+Write-Host "   18) Flowseal (SIMPLE FAKE ALT2) (general (SIMPLE FAKE ALT2).bat)" -ForegroundColor Green
+Write-Host "   19) Flowseal (SIMPLE FAKE) (general (SIMPLE FAKE).bat)" -ForegroundColor Green
+Write-Host "   20) Flowseal General Default (general.bat)" -ForegroundColor Green
+Write-Host "    0) Выход"
+Write-Host ""
 
-$selName = ""
+$choice = Read-Host "   Выберите номер пресета [0-20]"
+
+$selFileName = ""
 $selTitle = ""
 $selArgs = ""
 
 switch ($choice) {
-    "1" { $selName = "flowseal_alt"; $selTitle = "Flowseal ALT"; $selArgs = $s1_args }
-    "2" { $selName = "universal_md5sig"; $selTitle = "Универсальная (MD5Sig)"; $selArgs = $s2_args }
-    "3" { $selName = "multisplit_seqovl"; $selTitle = "MultiSplit SeqOvl"; $selArgs = $s3_args }
-    "4" { $selName = "fakeddisorder"; $selTitle = "FakedDisorder"; $selArgs = $s4_args }
-    "5" { $selName = "ttl_based"; $selTitle = "TTL-based"; $selArgs = $s5_args }
-    "6" { $selName = "hostfakesplit"; $selTitle = "HostFakeSplit"; $selArgs = $s6_args }
+    "1" { $selFileName = "general (ALT).bat"; $selTitle = "Flowseal (ALT)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "2" { $selFileName = "general (ALT10).bat"; $selTitle = "Flowseal (ALT10)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "3" { $selFileName = "general (ALT11).bat"; $selTitle = "Flowseal (ALT11)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "4" { $selFileName = "general (ALT12).bat"; $selTitle = "Flowseal (ALT12)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "5" { $selFileName = "general (ALT2).bat"; $selTitle = "Flowseal (ALT2)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "6" { $selFileName = "general (ALT3).bat"; $selTitle = "Flowseal (ALT3)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "7" { $selFileName = "general (ALT4).bat"; $selTitle = "Flowseal (ALT4)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "8" { $selFileName = "general (ALT5).bat"; $selTitle = "Flowseal (ALT5)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "9" { $selFileName = "general (ALT6).bat"; $selTitle = "Flowseal (ALT6)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "10" { $selFileName = "general (ALT7).bat"; $selTitle = "Flowseal (ALT7)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "11" { $selFileName = "general (ALT8).bat"; $selTitle = "Flowseal (ALT8)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "12" { $selFileName = "general (ALT9).bat"; $selTitle = "Flowseal (ALT9)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "13" { $selFileName = "general (FAKE TLS AUTO ALT).bat"; $selTitle = "Flowseal (FAKE TLS AUTO ALT)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "14" { $selFileName = "general (FAKE TLS AUTO ALT2).bat"; $selTitle = "Flowseal (FAKE TLS AUTO ALT2)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "15" { $selFileName = "general (FAKE TLS AUTO ALT3).bat"; $selTitle = "Flowseal (FAKE TLS AUTO ALT3)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "16" { $selFileName = "general (FAKE TLS AUTO).bat"; $selTitle = "Flowseal (FAKE TLS AUTO)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "17" { $selFileName = "general (SIMPLE FAKE ALT).bat"; $selTitle = "Flowseal (SIMPLE FAKE ALT)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "18" { $selFileName = "general (SIMPLE FAKE ALT2).bat"; $selTitle = "Flowseal (SIMPLE FAKE ALT2)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "19" { $selFileName = "general (SIMPLE FAKE).bat"; $selTitle = "Flowseal (SIMPLE FAKE)"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
+    "20" { $selFileName = "general.bat"; $selTitle = "Flowseal General Default"; $selArgs = "--wf-tcp=80,443,2053,2083,2087,2096,8443 --wf-udp=443,19294-19344,50000-50100 ^" }
     "0" { exit 0 }
     default { Write-Host "   [!] Неверный выбор" -ForegroundColor Red; exit 0 }
 }
 
 Get-Process -Name "winws" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Start-Sleep -Seconds 1
+Start-Sleep -Milliseconds 500
 
-$configContent = "STRATEGY=" + $selName + "`r`nARGS=" + $selArgs
+$configContent = "WINWS_BAT=" + $selFileName + "`r`nARGS=" + $selArgs
 Set-Content -Path $CONFIG_FILE -Value $configContent -Encoding UTF8
 
 Start-Process -FilePath $WINWS_EXE -ArgumentList $selArgs -WindowStyle Hidden
@@ -74,11 +84,11 @@ Start-Sleep -Seconds 2
 
 Write-Host ""
 Write-Host "==================================================" -ForegroundColor Green
-Write-Host "        [OK] СТРАТЕГИЯ УСПЕШНО АКТИВИРОВАНА       " -ForegroundColor Green
+Write-Host "        [OK] ПРЕСЕТ УСПЕШНО АКТИВИРОВАН          " -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "   * Выбран профиль: $selTitle" -ForegroundColor Cyan
-Write-Host "   * Статус службы:  [OK] ЗАПУЩЕНА И РАБОТАЕТ" -ForegroundColor Green
+Write-Host "   * Выбран пресет:  $selTitle ($selFileName)" -ForegroundColor Cyan
+Write-Host "   * Статус службы:  [OK] ЗАПУЩЕН И РАБОТАЕТ" -ForegroundColor Green
 Write-Host ""
 Write-Host "[Экспресс-тест доступа]" -ForegroundColor Yellow
 
