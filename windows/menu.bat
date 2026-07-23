@@ -1,6 +1,8 @@
-﻿@echo off
+@echo off
 chcp 65001 >nul
+cd /d "%~dp0"
 title Zapret Control Panel - Windows
+
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo.
